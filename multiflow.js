@@ -27,7 +27,10 @@ Running:
 
 var WF_URL = 'https://workflowy.com';
 
-/* helpers */
+/* ---------------------------------------------------------------------------------------------------------------------
+ * HELPERS
+ */
+
 function stop (event) {
   event.preventDefault();
   event.stopImmediatePropagation();
@@ -37,6 +40,10 @@ function isModifier (event) {
   return navigator.platform.startsWith('Mac')
     ? event.metaKey
     : event.ctrlKey;
+}
+
+function isVisible (el) {
+  return el.style.display !== 'none';
 }
 
 function isLastFrame (frame) {
@@ -60,6 +67,10 @@ function runWhen (condition, action, interval = 500) {
   });
 }
 
+/* ---------------------------------------------------------------------------------------------------------------------
+ * GETTERS
+ */
+
 function getDoc (window) {
   return (window.document || window.contentDocument);
 }
@@ -72,6 +83,11 @@ function getFrames () {
   return Array.from(window.frames);
 }
 
+function getFrameElement (frame) {
+  const index = getFrames().indexOf(frame)
+  return document.querySelectorAll('iframe')[index]
+}
+
 function getNextFrame (frame) {
   var frames = getFrames();
   var index = frames.indexOf(frame);
@@ -80,11 +96,33 @@ function getNextFrame (frame) {
     : undefined;
 }
 
+/* ---------------------------------------------------------------------------------------------------------------------
+ * FRAMES
+ */
+
+function addFrame (src, addClose) {
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('src', src || WF_URL);
+  document.body.appendChild(iframe);
+  return setupFrame(iframe.contentWindow, addClose);
+}
+
+function removeFrame (frame, hide = false) {
+  const iframe = getFrameElement(frame);
+  if (hide) {
+    iframe.style.display = 'none';
+    iframe.parentElement.appendChild(iframe);
+  }
+  else {
+    document.body.removeChild(iframe);
+  }
+}
+
 function loadNextFrame (frame, href) {
   var nextFrame = getNextFrame(frame);
   if (nextFrame) {
     nextFrame.location.href = href;
-
+    getFrameElement(nextFrame).style.display = 'block';
   }
   else {
     addFrame(href);
@@ -94,6 +132,10 @@ function loadNextFrame (frame, href) {
 function loadThisFrame (frame, href) {
   frame.location.href = href;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * PAGE INTERACTION
+ */
 
 function addDuplicateHandler (frame) {
   getDoc(frame).querySelector('.breadcrumbs').addEventListener('click', function (event) {
@@ -135,27 +177,23 @@ function addLinkHandler (frame) {
   }, { capture: true });
 }
 
-function addCloseButton (frame, iframe) {
+function addCloseButton (frame) {
   const doc = getDoc(frame);
   const button = doc.createElement('div');
   doc.body.querySelector('.header').appendChild(button);
   button.style.marginLeft = '-10px';
   button.style.marginRight = '10px';
   button.innerHTML = '<div class="iconButton _pn8v4l"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke-linecap="round" stroke="#b7bcbf" style="position: relative;"><line x1="1" y1="1" x2="19" y2="19"></line><line x1="19" y1="1" x2="1" y2="19"></line></svg></div>';
-  button.addEventListener('click', function () {
-    document.body.removeChild(iframe);
+  button.addEventListener('click', function (event) {
+    removeFrame(frame, !isModifier(event))
   });
 }
 
-function addFrame (src, addClose) {
-  const iframe = document.createElement('iframe');
-  iframe.setAttribute('src', src || WF_URL);
-  document.body.appendChild(iframe);
-  return setupFrame(iframe, addClose);
-}
+/* ---------------------------------------------------------------------------------------------------------------------
+ * SETUP
+ */
 
-function setupFrame (iframe, addClose = true) {
-  const frame = iframe.contentWindow;
+function setupFrame (frame, addClose = true) {
   return new Promise(function (resolve) {
     frame.addEventListener('load', function () {
       runWhen(checkLoaded(getDoc(frame)), () => {
@@ -163,7 +201,7 @@ function setupFrame (iframe, addClose = true) {
         addLinkHandler(frame);
         addDuplicateHandler(frame);
         if (addClose) {
-          addCloseButton(frame, iframe);
+          addCloseButton(frame);
         }
       });
       resolve(frame);
@@ -173,19 +211,22 @@ function setupFrame (iframe, addClose = true) {
 
 function setupStorage () {
   setInterval(function () {
-    var frames = getFrames();
+    var frames = getFrames().filter(frame => {
+      const iframe = getFrameElement(frame);
+      return isVisible(iframe);
+    });
     var titles = frames.map(frame => getDoc(frame).title.replace(' - WorkFlowy', ''));
     var title = 'MultiFlow: ' + titles.join(' + ');
     if (document.title !== title) {
       document.title = title;
       var urls = frames.map(frame => frame.location.href);
-      localStorage.setItem('multiflowy', JSON.stringify({ urls, titles }));
+      localStorage.setItem('multiflow', JSON.stringify({ urls, titles }));
     }
   }, 1000);
 }
 
 function setupPage () {
-  var data = JSON.parse(localStorage.getItem('multiflowy') || '{}');
+  var data = JSON.parse(localStorage.getItem('multiflow') || '{}');
   var titles = data.titles || [];
   var saved = data.urls || [];
   var current = location.href;
@@ -197,7 +238,7 @@ function setupPage () {
     : [current, current];
   document.body.innerHTML = `
     <style>
-      html, body {
+      html, body, #frames {
         display: flex;
         width: 100%;
         height: 100%;
@@ -233,7 +274,7 @@ function setupApp () {
   /* setup */
   setupPage();
   setupStorage();
-  setupFrame(document.querySelector('iframe'), false);
+  setupFrame(getFrames()[0], false);
   location.replace(WF_URL + '/#multiflow');
 
   /* done! */
@@ -241,6 +282,10 @@ function setupApp () {
   console.log('For updates, see original script at: https://gist.github.com/davestewart/a86ed576604cee9f8a15bd97451a6974');
   window.loadState = 'running';
 }
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * MAIN
+ */
 
 /* load */
 if (!window.location.href.startsWith(WF_URL)) {
@@ -254,6 +299,8 @@ else if (!window.loadState) {
   console.log('Initializing MultiFlow...');
   runWhen(checkLoaded(document), setupApp);
 }
+
+/* already running! */
 else {
   console.log('MultiFlow is already ' + window.loadState + '...');
 }
