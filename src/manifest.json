@@ -1,0 +1,46 @@
+{
+  "name": "Workflowy Multiflow",
+  "description" : "Navigate, organise & maintain context between separate WorkFlowy trees",
+  "version": "1.0",
+  "manifest_version": 2,
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "permissions": [
+    "https://workflowy.com/*",
+    "declarativeContent",
+    "tabs",
+    "activeTab"
+  ],
+  "background": {
+    "persistent": false,
+    "scripts": [
+      "background/background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "all_frames": false,
+      "run_at": "document_idle",
+      "js": [
+        "content/multiflow.js"
+      ],
+      "css": [
+        "content/styles.css"
+      ],
+      "matches": [
+        "https://workflowy.com/*"
+      ]
+    }
+  ],
+  "page_action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "WorkFlowy MultiFlow",
+    "default_icon": {
+      "32": "assets/icon-32.png"
+    }
+  }
+}

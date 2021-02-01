@@ -1,0 +1,43 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#container {
+    display: flex;
+    height: 100%;
+}
+
+iframe {
+    flex: 1;
+    height: 100%;
+    border: none;
+}
+
+iframe:not(:last-child) {
+    border-right: 1px solid #DDD;
+}
+
+body[data-layout="fit-left"] iframe:first-child {
+    max-width: 450px;
+}
+
+body[data-layout="fit-content"] {
+    overflow-x: scroll;
+}
+
+body[data-layout="fit-content"] iframe {
+    max-width: 700px;
+    border-right: 1px solid #DDD;
+}
+
+body[data-frames="1"] iframe {
+    max-width: unset !important;
+}
+
+.hidden {
+    display: none;
+}
