@@ -257,6 +257,35 @@ class Manager {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// DATA
+// ---------------------------------------------------------------------------------------------------------------------
+
+class Data {
+  load () {
+    return JSON.parse(localStorage.getItem('multiflow') || '{}')
+  }
+
+  save (frames) {
+    // input data
+    const input = manager.frames
+      .filter(frame => frame.isVisible())
+      .map(frame => frame.getData())
+
+    // output data
+    const urls = input.map(d => d.url)
+    const titles = input.map(d => d.title)
+    const data = { urls, titles }
+
+    // check
+    const title = 'MultiFlow: ' + titles.join(' + ')
+    if (document.title !== title) {
+      document.title = title
+      localStorage.setItem('multiflow', JSON.stringify(data))
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 // APP
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -266,80 +295,66 @@ class App {
   }
 
   start () {
-    // load
-    if (!window.location.href.startsWith(WF_URL)) {
-      console.log('Loading workflowy.com...')
-      window.location.href = WF_URL
-    }
-
     // initialize
-    else if (!window.loadState) {
-      window.loadState = 'initializing'
+    if (!this.loadState) {
+      this.loadState = 'initializing'
       console.log('Initializing MultiFlow...')
-      runWhen(checkLoaded(document), this.init.bind(this))
+      this.init()
     }
 
     // already running!
     else {
-      console.log('MultiFlow is already ' + window.loadState + '...')
+      console.log('MultiFlow is already ' + this.loadState + '...')
     }
+
+    // return state
+    return this.loadState
   }
 
   init () {
+    // flags
     location.replace(WF_URL + '/#multiflow')
-    window.loadState = 'running'
+    this.loadState = 'loaded'
+
+    // state
     this.setup()
     this.load()
-  }
-
-  setup () {
-    // page
-    document.head.innerHTML = ''
-    document.title = 'MultiFlow'
-    document.body.innerHTML = '<main id="container"/>'
-    document.body.removeAttribute('class')
-
-    // container
-    manager.container = document.getElementById('container')
 
     // save
     setInterval(this.save, 1000)
   }
 
+  setup () {
+    document.write(`
+    <html>
+        <head>
+            <title>MultiFlow</title>
+            <link rel="stylesheet" href="${chrome.runtime.getURL('content/styles.css')}">
+        </head>
+        <body>
+            <main id="container"/></body>
+    </html>`)
+    manager.container = document.getElementById('container')
+  }
+
   load () {
-    // saved data
-    const data = JSON.parse(localStorage.getItem('multiflow') || '[]')
-    const titles = data.map(datum => datum.title)
-    const saved = data.map(datum => datum.url)
-
-    // new data
+    const saved = data.load()
     const current = location.href
-    const loadPrevious = titles.length
-      ? confirm(`Load previous flows ?\n\n - ${titles.join('\n - ')}`)
-      : false
-    const urls = loadPrevious
-      ? saved
-      : [current, current]
-
-    // load
+    const urls = saved.urls || [current, current]
     urls.forEach(url => manager.addFrame(url))
   }
 
   save () {
-    const data = manager.frames
+    const frames = manager.frames
       .filter(frame => frame.isVisible())
       .map(frame => frame.getData())
-      .filter(data => data.url)
-    const title = 'MultiFlow: ' + data.map(datum => datum.title).join(' + ')
-    if (document.title !== title) {
-      document.title = title
-      localStorage.setItem('multiflow', JSON.stringify(data))
-    }
+    data.save(frames)
   }
 
   setLayout (value) {
     document.body.setAttribute('data-layout', value)
     manager.update()
+    return true
   }
 }
 
@@ -353,16 +368,23 @@ const WF_WIDTH = 700
 
 // instances
 const manager = new Manager()
+const data = new Data()
 const app = new App()
 
+// debug
+console.log('MultiFlow is ready...')
+
 // commands
-chrome.runtime.onMessage.addListener(function (request = {}, sender, callback) {
+chrome.runtime.onMessage.addListener(function (request = {}, _sender, callback) {
   switch (request.type) {
     case 'start':
-      app.start()
-      break
+      return callback(app.start())
+
     case 'layout':
-      app.setLayout(request.value)
-      break
+      return callback(app.setLayout(request.value))
+
+    default:
+      // eslint-disable-next-line node/no-callback-literal
+      return callback('Unknown request')
   }
 })

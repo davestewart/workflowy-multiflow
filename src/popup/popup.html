@@ -11,25 +11,6 @@
             font-family: "Varela Round", AppleSystemUIFont, SansSerif, sans-serif;
         }
 
-        button {
-            width: 200px;
-            margin: 5px;
-            border: none;
-            padding: 20px;
-            border-radius: 5px;
-            background: #EEE;
-            outline: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #AAA;
-        }
-
-        button:not(:last-child) {
-            margin-bottom: 5px;
-        }
-
         .screen {
             width: 160px;
             cursor: pointer;
@@ -40,7 +21,15 @@
         }
 
         .screen:hover .panel {
-            fill: #95B6CB;
+            fill: #c4deef;
+        }
+
+        .screen .label {
+            display: none;
+        }
+
+        .screen:hover .label{
+            display: block;
         }
     </style>
 </head>
@@ -53,7 +42,7 @@
                 <rect class="panel" x="41" y="4" width="115" height="82" rx="2"/>
                 <rect class="panel" x="4" y="4" width="35" height="82" rx="2"/>
                 <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g transform="translate(47.5 34)">
+                <g class="label" transform="translate(47.5 34)">
                     <rect fill="#000" width="65" height="22" rx="11"/>
                     <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
                         <tspan x="9.716" y="16.5">fit left</tspan>
@@ -63,6 +52,7 @@
         </svg>
     </div>
 
+    <!--
     <div class="screen" data-type="layout" data-value="fit-screen">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
             <g fill="none" fill-rule="evenodd">
@@ -70,7 +60,24 @@
                 <rect class="panel" x="55" y="4" width="50" height="82" rx="2"/>
                 <rect class="panel" x="4" y="4" width="49" height="82" rx="2"/>
                 <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g transform="translate(35 34)">
+                <g class="label" transform="translate(35 34)">
+                    <rect fill="#000" width="90" height="22" rx="11"/>
+                    <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
+                        <tspan x="9.792" y="16.5">fit screen</tspan>
+                    </text>
+                </g>
+            </g>
+        </svg>
+    </div>
+    -->
+
+    <div class="screen" data-type="layout" data-value="fit-screen">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
+            <g fill="none" fill-rule="evenodd">
+                <rect class="panel" x="81" y="4" width="75" height="82" rx="2"/>
+                <rect class="panel" x="4" y="4" width="74" height="82" rx="2"/>
+                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
+                <g class="label" transform="translate(35 34)">
                     <rect fill="#000" width="90" height="22" rx="11"/>
                     <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
                         <tspan x="9.792" y="16.5">fit screen</tspan>
@@ -84,11 +91,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
             <g fill="none" fill-rule="evenodd">
                 <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <path d="M130 4h26v82h-26a2 2 0 01-2-2V6a2 2 0 012-2z" class="panel"/>
+                <path class="panel extra" d="M130 4h26v82h-26a2 2 0 01-2-2V6a2 2 0 012-2z"/>
                 <rect class="panel" x="66" y="4" width="60" height="82" rx="2"/>
                 <rect class="panel" x="4" y="4" width="60" height="82" rx="2"/>
                 <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g transform="translate(30 34)">
+                <g class="label" transform="translate(30 34)">
                     <rect fill="#000" width="100" height="22" rx="11"/>
                     <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
                         <tspan x="10.536" y="16.5">fit content</tspan>

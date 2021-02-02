@@ -1,5 +1,5 @@
 {
-  "name": "Workflowy Multiflow",
+  "name": "WorkFlowy MultiFlow",
   "description" : "Navigate, organise & maintain context between separate WorkFlowy trees",
   "version": "1.0",
   "manifest_version": 2,
@@ -12,7 +12,6 @@
   "permissions": [
     "https://workflowy.com/*",
     "declarativeContent",
-    "tabs",
     "activeTab"
   ],
   "background": {
