@@ -1,6 +1,15 @@
 console.log('background run!')
 
 chrome.runtime.onInstalled.addListener(function () {
+  // inject content into existing pages
+  chrome.tabs.query({}, function (tabs) {
+    tabs.filter(tab => tab.url && tab.url.startsWith('https://workflowy.com'))
+      .forEach(tab => {
+        chrome.tabs.executeScript(tab.id, { file: 'content/multiflow.js' }, console.log)
+      })
+  })
+
+  // add declarative content
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
     chrome.declarativeContent.onPageChanged.addRules([
       {
