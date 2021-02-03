@@ -1,5 +1,9 @@
 # WorkFlowy MultiFlow
 
+> Columns view for Workflowy
+
+![screenshot](assets/screenshot.png)
+
 ## Intro
 
 WorkFlowy MultiFlow adds a multi-column view to WorkFlowy, which enables you to maintain an overview over several trees at once, or refactor longer lists by copying and pasting between two columns, instead of scrolling up and down in a single window.
