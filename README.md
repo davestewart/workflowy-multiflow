@@ -13,7 +13,7 @@ Columns are opened by Cmd/Ctrl+Clicking on:
 
 - bullets
 - internal links
-- the page heading
+- the breadcrumbs' page name
 
 You can open and close as many columns as you require, and change the layout by clicking on the toolbar icon and selecting the layout from the popup.
 
@@ -36,7 +36,7 @@ npm run release
 
 A zip file will be saved to `../releases`.
 
-Upload this file to the Chrome Developer Dashboard and publish using the tools provided.
+Upload this file to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole/8051cfa9-44b7-4869-9a94-1843ebf8c388?hl=en-GB) and publish using the tools provided.
 
 
 ## Assets
@@ -46,5 +46,6 @@ The file `assets/multiflow.sketch` is a [Sketch](https://www.sketch.com/) file c
 
 ## Links
 
-- [Chrome Web Store Listing](https://chrome.google.com/webstore/detail/workflowy-multiflow/khjdmjcmpolknpccmaaipmidphjokhdf)
-- [Developer Dashboard](https://chrome.google.com/webstore/devconsole/8051cfa9-44b7-4869-9a94-1843ebf8c388?hl=en-GB)
+- [Chrome Web Store](https://chrome.google.com/webstore/detail/workflowy-multiflow/khjdmjcmpolknpccmaaipmidphjokhdf)
+- [Product Hunt](https://www.producthunt.com/posts/workflowy-multiflow)
+- [Reddit](https://www.reddit.com/r/Workflowy/comments/l9eoqz/workflowy_multiflow_navigate_organise_maintain/)
