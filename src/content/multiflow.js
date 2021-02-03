@@ -298,7 +298,7 @@ class App {
     // initialize
     if (!this.loadState) {
       this.loadState = 'initializing'
-      console.log('Initializing MultiFlow...')
+      console.log('MultiFlow is initializing...')
       this.init()
     }
 
@@ -312,13 +312,13 @@ class App {
   }
 
   init () {
-    // flags
-    location.replace(WF_URL + '/#multiflow')
-    this.loadState = 'loaded'
-
     // state
     this.setup()
     this.load()
+
+    // flags
+    this.loadState = 'loaded'
+    location.replace(WF_URL + '/#multiflow')
 
     // save
     setInterval(this.save, 1000)
@@ -329,12 +329,60 @@ class App {
     <html>
         <head>
             <title>MultiFlow</title>
-            <link rel="stylesheet" href="${chrome.runtime.getURL('content/styles.css')}">
+            <style>
+                html, body {
+                    width: 100%;
+                    height: 100%;
+                }
+                
+                body.multiflow {
+                    margin: 0;
+                    padding: 0;
+                    overflow: hidden;
+                }
+                
+                body.multiflow main {
+                    display: flex;
+                    height: 100%;
+                }
+                
+                body.multiflow iframe {
+                    flex: 1;
+                    height: 100%;
+                    border: none;
+                }
+                
+                body.multiflow iframe:not(:last-child) {
+                    border-right: 1px solid #DDD;
+                }
+                
+                body.multiflow[data-layout="fit-left"] iframe:first-child {
+                    max-width: 450px;
+                }
+                
+                body.multiflow[data-layout="fit-content"] {
+                    overflow-x: scroll;
+                }
+                
+                body.multiflow[data-layout="fit-content"] iframe {
+                    max-width: 700px;
+                    border-right: 1px solid #DDD;
+                }
+                
+                body.multiflow[data-frames="1"] iframe {
+                    max-width: unset !important;
+                }
+                
+                body.multiflow .hidden {
+                    display: none;
+                }
+            </style>
         </head>
-        <body>
-            <main id="container"/></body>
+        <body class="multiflow">
+            <main/>
+        </body>
     </html>`)
-    manager.container = document.getElementById('container')
+    manager.container = document.querySelector('main')
   }
 
   load () {

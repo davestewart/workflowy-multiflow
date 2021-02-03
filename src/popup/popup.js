@@ -14,7 +14,9 @@ function runCommand (type, value, callback = noop) {
 
 function runScript (code, callback = noop) {
   getCurrentTab(function (tab) {
-    const payload = { code }
+    const payload = code.endsWith('.js')
+      ? { file: code }
+      : { code }
     console.log('Executing:', payload)
     chrome.tabs.executeScript(tab.id, payload, callback)
   })
