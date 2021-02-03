@@ -104,7 +104,7 @@ class Frame {
     // duplicate frame handler
     document.querySelector('.breadcrumbs').addEventListener('click', (event) => {
       if (event.target.matches('a:last-of-type') && isModifier(event)) {
-        parent.loadNextFrame(frame, frame.location.href)
+        parent.loadNextFrame(this, frame.location.href)
       }
     })
 
@@ -116,7 +116,7 @@ class Frame {
         ? target
         : target.closest(selector)
       if (link && isModifier(event)) {
-        parent.loadNextFrame(frame, WF_URL + link.getAttribute('href'))
+        parent.loadNextFrame(this, WF_URL + link.getAttribute('href'))
         stop(event)
       }
     }, { capture: true })
@@ -232,11 +232,13 @@ class Manager {
 
   loadNextFrame (frame, href) {
     const index = this.frames.indexOf(frame)
-    const nextFrame = this.frames[index + 1]
-    nextFrame
-      ? nextFrame.load(href)
-      : this.addFrame(href)
-    this.update()
+    if (index > -1) {
+      const nextFrame = this.frames[index + 1]
+      nextFrame
+        ? nextFrame.load(href)
+        : this.addFrame(href)
+      this.update()
+    }
   }
 
   update () {
