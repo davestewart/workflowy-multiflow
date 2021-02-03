@@ -4,6 +4,7 @@
 
 ![screenshot](assets/screenshot.png)
 
+
 ## Intro
 
 WorkFlowy MultiFlow adds a multi-column view to WorkFlowy, which enables you to maintain an overview over several trees at once, or refactor longer lists by copying and pasting between two columns, instead of scrolling up and down in a single window.
@@ -20,9 +21,11 @@ When you first click the icon your previous session will be loaded so you can st
 
 Click here for a [video](https://www.youtube.com/watch?v=Iy1DuGjUhR4).
 
+
 ## Development
 
 The extension is not compiled, so all JavaScript will just run as-is.
+
 
 ## Releasing
 
@@ -35,12 +38,13 @@ A zip file will be saved to `../releases`.
 
 Upload this file to the Chrome Developer Dashboard and publish using the tools provided.
 
+
 ## Assets
 
-Icons and assets are stored outside this repository.
+The file `assets/multiflow.sketch` is a [Sketch](https://www.sketch.com/) file containing the icons and UI images for the extension.
+
 
 ## Links
 
 - [Chrome Web Store Listing](https://chrome.google.com/webstore/detail/workflowy-multiflow/khjdmjcmpolknpccmaaipmidphjokhdf)
 - [Developer Dashboard](https://chrome.google.com/webstore/devconsole/8051cfa9-44b7-4869-9a94-1843ebf8c388?hl=en-GB)
-
