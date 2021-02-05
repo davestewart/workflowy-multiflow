@@ -12,12 +12,12 @@ WorkFlowy MultiFlow adds a multi-column view to WorkFlowy, which enables you to 
 Columns are opened by Cmd/Ctrl+Clicking on:
 
 - bullets
-- internal links
-- the breadcrumbs' page name
+- links to other pages
+- the breadcrumbs' page title
 
 You can open and close as many columns as you require, and change the layout by clicking on the toolbar icon and selecting the layout from the popup.
 
-When you first click the icon your previous session will be loaded so you can start off where you were before.
+When you first click the icon your previous session will be loaded so you can start where you left off.
 
 Click here for a [video](https://www.youtube.com/watch?v=Iy1DuGjUhR4).
 
