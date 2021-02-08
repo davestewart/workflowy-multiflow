@@ -5,7 +5,9 @@ chrome.runtime.onInstalled.addListener(function () {
   chrome.tabs.query({}, function (tabs) {
     tabs.filter(tab => tab.url && tab.url.startsWith('https://workflowy.com'))
       .forEach(tab => {
-        chrome.tabs.executeScript(tab.id, { file: 'content/multiflow.js' }, console.log)
+        chrome.tabs.executeScript(tab.id, { file: 'content/multiflow.js' }, function (frames) {
+          console.log('MultiFlow content script executed in', frames)
+        })
       })
   })
 

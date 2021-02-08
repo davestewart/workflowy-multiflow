@@ -1,7 +1,7 @@
 {
   "name": "WorkFlowy MultiFlow",
   "description" : "Navigate, organise & maintain context between separate WorkFlowy trees",
-  "version": "1.01",
+  "version": "1.2.0",
   "manifest_version": 2,
   "icons": {
     "16": "assets/icon-16.png",

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // ---------------------------------------------------------------------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------------------------------------------------------------------
@@ -60,13 +61,25 @@ function addStyles (document, content) {
 // FRAME
 // ---------------------------------------------------------------------------------------------------------------------
 
+/**
+ * Frame class
+ *
+ * @property {Manager}      manager
+ * @property {number}       index
+ * @property {Window}       window
+ * @property {HTMLElement}  element
+ */
 class Frame {
-  constructor (parent, index) {
-    this.parent = parent
+  /**
+   *
+   * @param {Manager} manager
+   * @param {number}  index
+   */
+  constructor (manager, index) {
+    this.manager = manager
     this.index = index
     this.window = null
     this.element = null
-    this.visible = true
   }
 
   create (src) {
@@ -87,7 +100,7 @@ class Frame {
 
   init () {
     // variables
-    const parent = this.parent
+    const manager = this.manager
     const frame = this.window
     const element = this.element
     const document = getDoc(element)
@@ -104,7 +117,7 @@ class Frame {
     // duplicate frame handler
     document.querySelector('.breadcrumbs').addEventListener('click', (event) => {
       if (event.target.matches('a:last-of-type') && isModifier(event)) {
-        parent.loadNextFrame(this, frame.location.href)
+        manager.loadNextFrame(this, frame.location.href)
       }
     })
 
@@ -116,7 +129,7 @@ class Frame {
         ? target
         : target.closest(selector)
       if (link && isModifier(event)) {
-        parent.loadNextFrame(this, WF_URL + link.getAttribute('href'))
+        manager.loadNextFrame(this, WF_URL + link.getAttribute('href'))
         stop(event)
       }
     }, { capture: true })
@@ -127,7 +140,7 @@ class Frame {
       if (el.tagName === 'A') {
         const href = el.getAttribute('href')
         if (href.startsWith(WF_URL)) {
-          parent.load(this, href, isModifier(event))
+          manager.load(this, href, isModifier(event))
           stop(event)
         }
       }
@@ -142,8 +155,8 @@ class Frame {
       button.innerHTML = '<div class="iconButton _pn8v4l"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke-linecap="round" stroke="#b7bcbf" style="position: relative;"><line x1="1" y1="1" x2="19" y2="19"></line><line x1="19" y1="1" x2="1" y2="19"></line></svg></div>'
       button.addEventListener('click', (event) => {
         isModifier(event)
-          ? parent.removeFrame(this)
-          : parent.hideFrame(this)
+          ? manager.removeFrame(this)
+          : manager.hideFrame(this)
       })
     }
   }
@@ -185,6 +198,12 @@ class Frame {
 // MANAGER
 // ---------------------------------------------------------------------------------------------------------------------
 
+/**
+ * Manager class
+ *
+ * @property {Frame[]}      frames
+ * @property {HTMLElement}  container
+ */
 class Manager {
   constructor () {
     this.frames = []
@@ -252,9 +271,12 @@ class Manager {
     if (this.container) {
       const layout = document.body.getAttribute('data-layout')
       this.container.style.width = layout === 'fit-content'
-        ? (WF_WIDTH * manager.numVisible) + 'px'
+        ? (WF_WIDTH * this.numVisible) + 'px'
         : 'auto'
     }
+
+    // trigger save
+    document.dispatchEvent(new Event('multiflow:update'))
   }
 }
 
@@ -262,28 +284,40 @@ class Manager {
 // DATA
 // ---------------------------------------------------------------------------------------------------------------------
 
+/**
+ * Data class
+ */
 class Data {
+  /**
+   * Loads frame data
+   * @returns {{urls: string[], titles: string[], layout: string}}
+   */
   load () {
     return JSON.parse(localStorage.getItem('multiflow') || '{}')
   }
 
-  save (frames) {
+  /**
+   * Save visible frames
+   * @param {Frame[]} frames
+   * @param {string}  layout
+   */
+  save (frames, layout) {
     // input data
-    const input = manager.frames
+    const input = frames
       .filter(frame => frame.isVisible())
       .map(frame => frame.getData())
 
     // output data
     const urls = input.map(d => d.url)
     const titles = input.map(d => d.title)
-    const data = { urls, titles }
+    const data = { urls, titles, layout }
 
-    // check
-    const title = 'MultiFlow: ' + titles.join(' + ')
-    if (document.title !== title) {
-      document.title = title
-      localStorage.setItem('multiflow', JSON.stringify(data))
-    }
+    // save
+    document.title = 'MultiFlow: ' + titles.join(' + ')
+    localStorage.setItem('multiflow', JSON.stringify(data))
+
+    // return
+    return data
   }
 }
 
@@ -291,12 +325,32 @@ class Data {
 // APP
 // ---------------------------------------------------------------------------------------------------------------------
 
+/**
+ * Application class
+ *
+ * @property {boolean}  loadState
+ * @property {Manager}  manager
+ * @property {Data}     data
+ */
 class App {
-  constructor () {
+  /**
+   * Application class
+   *
+   * @param {Manager} manager
+   * @param {Data}    data
+   */
+  constructor (manager, data) {
     this.loadState = null
+    this.manager = manager
+    this.data = data
   }
 
   start () {
+    // only load if top window
+    if (window !== window.top) {
+      return
+    }
+
     // initialize
     if (!this.loadState) {
       this.loadState = 'initializing'
@@ -322,13 +376,15 @@ class App {
     this.loadState = 'loaded'
     location.replace(WF_URL + '/#multiflow')
 
-    // save
-    setInterval(this.save, 1000)
+    // saving
+    const save = this.save.bind(this)
+    document.addEventListener('multiflow:update', save)
+    setInterval(save, 5000)
   }
 
   setup () {
     document.write(`
-    <html>
+    <html lang="en">
         <head>
             <title>MultiFlow</title>
             <style>
@@ -380,31 +436,39 @@ class App {
                 }
             </style>
         </head>
-        <body class="multiflow">
+        <body class="multiflow" data-layout="fit-screen">
             <main/>
         </body>
     </html>`)
-    manager.container = document.querySelector('main')
+    this.manager.container = document.querySelector('main')
   }
 
   load () {
-    const saved = data.load()
-    const current = location.href
-    const urls = saved.urls || [current, current]
-    urls.forEach(url => manager.addFrame(url))
+    if (!this.loadState) {
+      const saved = this.data.load()
+      const current = location.href
+      const urls = saved.urls || [current, current]
+      urls.forEach(url => this.manager.addFrame(url))
+      this.setLayout(saved.layout)
+    }
+    else {
+      console.warn('MultiFLow has already loaded data')
+    }
   }
 
   save () {
-    const frames = manager.frames
-      .filter(frame => frame.isVisible())
-      .map(frame => frame.getData())
-    data.save(frames)
+    return this.data.save(this.manager.frames, this.getLayout())
   }
 
   setLayout (value) {
-    document.body.setAttribute('data-layout', value)
-    manager.update()
-    return true
+    if (value) {
+      document.body.setAttribute('data-layout', value)
+      this.manager.update()
+    }
+  }
+
+  getLayout () {
+    return document.body.getAttribute('data-layout')
   }
 }
 
@@ -419,19 +483,22 @@ const WF_WIDTH = 700
 // instances
 const manager = new Manager()
 const data = new Data()
-const app = new App()
+const app = new App(manager, data)
 
 // debug
 console.log('MultiFlow is ready...')
 
 // commands
 chrome.runtime.onMessage.addListener(function (request = {}, _sender, callback) {
-  switch (request.type) {
+  switch (request.command) {
     case 'start':
       return callback(app.start())
 
-    case 'layout':
+    case 'setLayout':
       return callback(app.setLayout(request.value))
+
+    case 'getLayout':
+      return callback(app.getLayout())
 
     default:
       // eslint-disable-next-line node/no-callback-literal
