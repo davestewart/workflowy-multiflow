@@ -444,15 +444,17 @@ class App {
   }
 
   load () {
-    if (!this.loadState) {
+    if (this.loadState !== 'loaded') {
       const saved = this.data.load()
       const current = location.href
-      const urls = saved.urls || [current, current]
+      const urls = saved.urls && saved.urls.length
+        ? saved.urls
+        : [current, current]
       urls.forEach(url => this.manager.addFrame(url))
       this.setLayout(saved.layout)
     }
     else {
-      console.warn('MultiFLow has already loaded data')
+      console.warn('MultiFlow has already loaded data')
     }
   }
 
