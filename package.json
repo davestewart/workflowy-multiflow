@@ -1,13 +1,11 @@
 {
   "name": "multiflow-extension",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Columns view for WorkFlowy",
   "scripts": {
     "release": "node ./build/release.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Dave Stewart",
   "license": "ISC",
   "devDependencies": {
     "bestzip": "^2.1.7",
