@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "X-Frame-Options",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "workflowy.com/*",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame"
+      ]
+    }
+  }
+]
