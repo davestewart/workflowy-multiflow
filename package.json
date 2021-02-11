@@ -23,5 +23,8 @@
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-scss": "^2.6.1",
     "rollup-plugin-string": "^3.0.0"
+  },
+  "dependencies": {
+    "vue": "^2.6.12"
   }
 }

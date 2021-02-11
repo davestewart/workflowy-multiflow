@@ -1,114 +1,75 @@
 import './popup.scss'
+import { runCommand } from './utils.js'
 
-// ---------------------------------------------------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------------------------------------------------
+// import Vue from 'vue'
 
-function runCommand (command, value) {
-  return new Promise(function (resolve, reject) {
-    getCurrentTab(function (tab) {
-      const payload = { command, value }
-      console.log('Running:', command, value)
-      chrome.tabs.sendMessage(tab.id, payload, resolve)
-    })
-  })
-}
+window.app = new Vue({
+  el: '#app',
 
-// eslint-disable-next-line no-unused-vars
-function runScript (code) {
-  return new Promise(function (resolve, reject) {
-    getCurrentTab(function (tab) {
-      const payload = code.endsWith('.js')
-        ? { file: code }
-        : { code }
-      console.log('Executing:', payload)
-      chrome.tabs.executeScript(tab.id, payload, resolve)
-    })
-  })
-}
-
-function getCurrentTab (callback) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    const tab = tabs[0]
-    if (tab) {
-      callback(tab)
+  data () {
+    return {
+      clicked: false,
+      links: 'on-right',
+      layout: 'fit-screen',
+      sessionIndex: -1,
+      sessions: [
+        { id: 1, title: 'Session 01' },
+        { id: 2, title: 'Session 02' },
+      ],
     }
-    else {
-      console.warn('Could not get current tab')
-    }
-  })
-}
+  },
 
-// ---------------------------------------------------------------------------------------------------------------------
-// CLOSING
-// ---------------------------------------------------------------------------------------------------------------------
+  computed: {
+    session () {
+      return this.sessions[this.sessionIndex]
+    },
 
-// flag to track clicks
-let clicked = false
+    hasSessions () {
+      return this.sessions.length > 0
+    },
 
-document.body.addEventListener('mouseleave', () => {
-  if (clicked) {
-    window.close()
-    clicked = false
-  }
-})
+    noSelection () {
+      return this.sessionIndex === -1
+    },
+  },
 
-// ---------------------------------------------------------------------------------------------------------------------
-// LAYOUT
-// ---------------------------------------------------------------------------------------------------------------------
+  watch: {
+    layout: 'setLayout',
+  },
 
-function setLayout (layout) {
-  // deselect screens
-  screens.forEach(screen => {
-    screen.classList.remove('selected')
-  })
+  mounted () {
+    this.start()
 
-  // select new screen
-  document.querySelector('.screen')
-  const element = document.querySelector(`.screen[data-value="${layout}"]`)
-  if (element) {
-    element.classList.add('selected')
-  }
-}
+    document.body.addEventListener('mouseleave', () => {
+      if (this.clicked) {
+        // window.close()
+      }
+    })
+  },
 
-function onScreenClick (event) {
-  // variables
-  const target = event.currentTarget
-  const command = target.getAttribute('data-command')
-  const value = target.getAttribute('data-value')
+  methods: {
+    async start () {
+      // run the page start script
+      await runCommand('start')
 
-  // run code
-  setLayout(value)
-  runCommand(command, value).then(() => {
-    clicked = true
-  })
-}
+      // get layout
+      const layout = await runCommand('getLayout')
+      if (layout) {
+        this.layout = layout
+      }
+    },
 
-// grab screens
-const screens = Array.from(document.querySelectorAll('.screen'))
+    setLayout (value) {
+      console.log(value)
+      runCommand('setLayout', this.layout).then(() => {
+        this.clicked = true
+      })
+    },
 
-// add click handlers
-screens.forEach(button => {
-  button.addEventListener('click', onScreenClick)
-})
+    close () {
 
-// ---------------------------------------------------------------------------------------------------------------------
-// STARTUP
-// ---------------------------------------------------------------------------------------------------------------------
-
-async function start () {
-  // run the page start script
-  await runCommand('start')
-
-  // get layout
-  const layout = await runCommand('getLayout')
-  if (layout) {
-    setLayout(layout)
-  }
-}
-
-start().then(() => {
-  console.log('Popup opened')
+    },
+  },
 })
 
 console.log('MultiFlow background loaded')

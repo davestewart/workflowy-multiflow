@@ -22,6 +22,10 @@ export default class Page {
     document.querySelector('[rel="shortcut icon"]').setAttribute('href', chrome.runtime.getURL('assets/icons/icon-32.png'))
     document.write(html)
     this.container = document.querySelector('main')
+    this.container.style.display = 'none'
+    setTimeout(() => {
+      this.container.style.display = ''
+    }, 200)
   }
 
   getFrameIndex (frame) {

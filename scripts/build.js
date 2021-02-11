@@ -25,10 +25,6 @@ function merge (...args) {
   return mergeOptions.call({ concatArrays: true }, ...args)
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-// main
-// ---------------------------------------------------------------------------------------------------------------------
-
 function checkModule (srcFile, trgFile = srcFile) {
   // values
   const [name] = srcFile.split('.')
@@ -53,6 +49,10 @@ function checkModule (srcFile, trgFile = srcFile) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------------------------------------------------
+
 function bundle (name, options = {}) {
   // main
   const config = merge({ plugins: [] }, options)
@@ -62,7 +62,9 @@ function bundle (name, options = {}) {
   if (page) {
     config.plugins.push(
       copy({
-        watch: 'static',
+        watch: [
+          page.srcAbs,
+        ],
         targets: [
           { src: page.srcRel, dest: page.trgDir },
         ],
@@ -97,11 +99,15 @@ function bundle (name, options = {}) {
   return config
 }
 
-const config = [
+export default [
   bundle('background', {
     plugins: [
-      del({ targets: 'dist/*' }),
+      del({
+        targets: 'dist/*',
+        runOnce: true,
+      }),
       copy({
+        watch: 'static',
         targets: [
           { dest: 'dist', src: 'src/assets' },
           { dest: 'dist', src: 'src/manifest.json' },
@@ -113,5 +119,3 @@ const config = [
   bundle('content'),
   bundle('popup'),
 ]
-
-export default config

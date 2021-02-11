@@ -12,6 +12,7 @@
   },
   "permissions": [
     "https://workflowy.com/*",
+    "https://beta.workflowy.com/*",
     "declarativeNetRequest",
     "declarativeContent",
     "activeTab"
@@ -31,12 +32,16 @@
   },
   "web_accessible_resources": [
     "https://workflowy.com/*",
+    "https://beta.workflowy.com",
     "assets/icons/icon-32.png",
     "content/content.css"
   ],
   "content_scripts": [
     {
-      "matches": ["https://workflowy.com/*"],
+      "matches": [
+        "https://workflowy.com/*",
+        "https://beta.workflowy.com/*"
+      ],
       "all_frames": false,
       "run_at": "document_idle",
       "js": [
@@ -50,5 +55,6 @@
     "default_icon": {
       "32": "assets/icons/icon-32.png"
     }
-  }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; img-src * 'self' data: https: http: chrome: chrome://favicon/"
 }

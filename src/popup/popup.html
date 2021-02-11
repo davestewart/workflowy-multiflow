@@ -8,76 +8,73 @@
   <link rel="stylesheet" href="../assets/vendor/spectre.min.css">
   <link rel="stylesheet" href="popup.css">
   <script src="../assets/vendor/mac-fix.js"></script>
-  <script src="../assets/vendor/vue.min.js"></script>
+  <script src="../assets/vendor/vue.js"></script>
 </head>
 <body>
-<main>
-  <form class="form-horizontal" action="#forms">
-    <div class="form-group">
-      <div class="col-3 col-sm-12">
-        <label class="form-label" for="input-example-4">Name</label>
+<main id="app">
+  <h3>
+    <img src="../assets/icons/icon-128.png" width="38" height="38">
+    <span>WorkFlowy MultiFlow</span>
+  </h3>
+  <form class="form-horizontal form-horizontal">
+
+    <!-- layout -->
+    <div class="form-group ">
+      <div class="col-4">
+        <label class="form-label">Layout</label>
       </div>
-      <div class="col-9 col-sm-12">
-        <input class="form-input" id="input-example-4" type="text" placeholder="Name">
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-3 col-sm-12">
-        <label class="form-label" for="input-example-5">Email</label>
-      </div>
-      <div class="col-9 col-sm-12">
-        <input class="form-input" id="input-example-5" type="email" placeholder="Email">
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-3 col-sm-12">
-        <label class="form-label">Gender</label>
-      </div>
-      <div class="col-9 col-sm-12">
+      <div class="col-8">
         <label class="form-radio">
-          <input type="radio" name="gender"><i class="form-icon"></i> Male
+          <input v-model="layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit to screen
         </label>
         <label class="form-radio">
-          <input type="radio" name="gender" checked=""><i class="form-icon"></i> Female
+          <input v-model="layout" value="fit-content" type="radio" name="layout" checked=""><i class="form-icon"></i> Fit to content
+        </label>
+        <label class="form-radio">
+          <input v-model="layout" value="fit-left" type="radio" name="layout" checked=""><i class="form-icon"></i> Left-hand navigation
         </label>
       </div>
     </div>
-    <div class="form-group">
-      <div class="col-3 col-sm-12">
-        <label class="form-label">Source</label>
+
+    <!-- layout -->
+    <div class="form-group ">
+      <div class="col-4">
+        <label class="form-label">Links</label>
       </div>
-      <div class="col-9 col-sm-12">
-        <select class="form-select" multiple="">
-          <option>Slack</option>
-          <option>Skype</option>
-          <option>Hipchat</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-9 col-sm-12 col-ml-auto">
-        <label class="form-switch">
-          <input type="checkbox"><i class="form-icon"></i> Send me emails with news and tips
+      <div class="col-8">
+        <label class="form-radio">
+          <input v-model="links" value="on-right" type="radio" name="links" checked=""><i class="form-icon"></i> Open on right
+        </label>
+        <label class="form-radio">
+          <input v-model="links" value="in-place" type="radio" name="links"><i class="form-icon"></i> Open in place
         </label>
       </div>
     </div>
-    <div class="form-group">
-      <div class="col-3 col-sm-12">
-        <label class="form-label" for="input-example-6">Message</label>
+
+    <!-- saved -->
+    <div class="form-group" style="margin-top: 1em">
+      <div class="col-4">
+        <label class="form-label">Sessions</label>
       </div>
-      <div class="col-9 col-sm-12">
-        <textarea class="form-input" id="input-example-6" placeholder="Textarea" rows="3"></textarea>
+      <div class="col-8">
+        <div class="form-group mt-1">
+          <select v-model="sessionIndex" class="form-select select-sm" :disabled="sessions.length === 0">
+            <option :value="-1">Choose session</option>
+            <option v-for="(session, index) in sessions" :value="index">{{ session.title }}</option>
+          </select>
+        </div>
+        <div class="btn-group btn-group-block">
+          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Load</button>
+          <button type="button" class="btn-sm btn btn-primary">Save</button>
+          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Update</button>
+          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Delete</button>
+        </div>
       </div>
     </div>
-    <div class="form-group">
-      <div class="col-9 col-sm-12 col-ml-auto">
-        <label class="form-checkbox">
-          <input type="checkbox"><i class="form-icon"></i> Remember me
-        </label>
-      </div>
-    </div>
+
+
   </form>
 </main>
-<script src="popup.js"></script>
+<script type="module" src="popup.js"></script>
 </body>
 </html>
