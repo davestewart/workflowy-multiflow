@@ -1,0 +1,29 @@
+body {
+  width: 400px;
+  font-size: 14px;
+  font-family: "Varela Round", AppleSystemUIFont, SansSerif, sans-serif;
+  padding: .75em;
+}
+
+.screen {
+  width: 160px;
+  cursor: pointer;
+
+  &.selected .panel,
+  &:hover .panel {
+    fill: #c4deef;
+  }
+
+  & .label {
+    display: none;
+  }
+
+  &:hover .label {
+    display: block;
+  }
+
+  .panel {
+    fill: #E6E6E6;
+  }
+
+}

@@ -1,85 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>WorkFlowy MultiFlow</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-    <link href="popup.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>WorkFlowy MultiFlow</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap">
+  <link rel="stylesheet" href="../assets/vendor/spectre.min.css">
+  <link rel="stylesheet" href="popup.css">
+  <script src="../assets/vendor/mac-fix.js"></script>
+  <script src="../assets/vendor/vue.min.js"></script>
 </head>
-
 <body>
-<div class="screens">
-    <div class="screen" data-command="setLayout" data-value="fit-left">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
-            <g fill="none" fill-rule="evenodd">
-                <rect class="panel" x="41" y="4" width="115" height="82" rx="2"/>
-                <rect class="panel" x="4" y="4" width="35" height="82" rx="2"/>
-                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g class="label" transform="translate(47.5 34)">
-                    <rect fill="#000" width="65" height="22" rx="11"/>
-                    <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
-                        <tspan x="9.716" y="16.5">fit left</tspan>
-                    </text>
-                </g>
-            </g>
-        </svg>
+<main>
+  <form class="form-horizontal" action="#forms">
+    <div class="form-group">
+      <div class="col-3 col-sm-12">
+        <label class="form-label" for="input-example-4">Name</label>
+      </div>
+      <div class="col-9 col-sm-12">
+        <input class="form-input" id="input-example-4" type="text" placeholder="Name">
+      </div>
     </div>
-
-    <!--
-    <div class="screen" data-command="setLayout" data-value="fit-screen">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
-            <g fill="none" fill-rule="evenodd">
-                <rect class="panel" x="107" y="4" width="49" height="82" rx="2"/>
-                <rect class="panel" x="55" y="4" width="50" height="82" rx="2"/>
-                <rect class="panel" x="4" y="4" width="49" height="82" rx="2"/>
-                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g class="label" transform="translate(35 34)">
-                    <rect fill="#000" width="90" height="22" rx="11"/>
-                    <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
-                        <tspan x="9.792" y="16.5">fit screen</tspan>
-                    </text>
-                </g>
-            </g>
-        </svg>
+    <div class="form-group">
+      <div class="col-3 col-sm-12">
+        <label class="form-label" for="input-example-5">Email</label>
+      </div>
+      <div class="col-9 col-sm-12">
+        <input class="form-input" id="input-example-5" type="email" placeholder="Email">
+      </div>
     </div>
-    -->
-
-    <div class="screen" data-command="setLayout" data-value="fit-screen">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
-            <g fill="none" fill-rule="evenodd">
-                <rect class="panel" x="81" y="4" width="75" height="82" rx="2"/>
-                <rect class="panel" x="4" y="4" width="74" height="82" rx="2"/>
-                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g class="label" transform="translate(35 34)">
-                    <rect fill="#000" width="90" height="22" rx="11"/>
-                    <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
-                        <tspan x="9.792" y="16.5">fit screen</tspan>
-                    </text>
-                </g>
-            </g>
-        </svg>
+    <div class="form-group">
+      <div class="col-3 col-sm-12">
+        <label class="form-label">Gender</label>
+      </div>
+      <div class="col-9 col-sm-12">
+        <label class="form-radio">
+          <input type="radio" name="gender"><i class="form-icon"></i> Male
+        </label>
+        <label class="form-radio">
+          <input type="radio" name="gender" checked=""><i class="form-icon"></i> Female
+        </label>
+      </div>
     </div>
-
-    <div class="screen" data-command="setLayout" data-value="fit-content">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
-            <g fill="none" fill-rule="evenodd">
-                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <path class="panel extra" d="M130 4h26v82h-26a2 2 0 01-2-2V6a2 2 0 012-2z"/>
-                <rect class="panel" x="66" y="4" width="60" height="82" rx="2"/>
-                <rect class="panel" x="4" y="4" width="60" height="82" rx="2"/>
-                <rect stroke="#E6E6E6" stroke-width="2" x="1" y="1" width="158" height="88" rx="5"/>
-                <g class="label" transform="translate(30 34)">
-                    <rect fill="#000" width="100" height="22" rx="11"/>
-                    <text font-family="VarelaRound-Regular, Varela Round" font-size="16" fill="#FFF">
-                        <tspan x="10.536" y="16.5">fit content</tspan>
-                    </text>
-                </g>
-            </g>
-        </svg>
+    <div class="form-group">
+      <div class="col-3 col-sm-12">
+        <label class="form-label">Source</label>
+      </div>
+      <div class="col-9 col-sm-12">
+        <select class="form-select" multiple="">
+          <option>Slack</option>
+          <option>Skype</option>
+          <option>Hipchat</option>
+        </select>
+      </div>
     </div>
-</div>
-</body>
+    <div class="form-group">
+      <div class="col-9 col-sm-12 col-ml-auto">
+        <label class="form-switch">
+          <input type="checkbox"><i class="form-icon"></i> Send me emails with news and tips
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-3 col-sm-12">
+        <label class="form-label" for="input-example-6">Message</label>
+      </div>
+      <div class="col-9 col-sm-12">
+        <textarea class="form-input" id="input-example-6" placeholder="Textarea" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-9 col-sm-12 col-ml-auto">
+        <label class="form-checkbox">
+          <input type="checkbox"><i class="form-icon"></i> Remember me
+        </label>
+      </div>
+    </div>
+  </form>
+</main>
 <script src="popup.js"></script>
-<script src="mac-fix.js"></script>
+</body>
 </html>
