@@ -19,4 +19,7 @@ module.exports = {
     'comma-dangle': ['error', 'always-multiline'],
     'brace-style': ['error', 'stroustrup'],
   },
+  ignorePatterns: [
+    'dist',
+  ],
 }
