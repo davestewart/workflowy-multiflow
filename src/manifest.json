@@ -3,14 +3,16 @@
   "description" : "Navigate, organise & maintain context between separate WorkFlowy trees",
   "version": "1.2.1",
   "manifest_version": 2,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoWDu35r1oWfV8YVlJbXNOpqL3lhgO4wgyb7dfAcl6trIfwsQSg2W3EERJDbN3LzhYEmvszbrQlot+scVpK9WM94HbXag8IBEIiIh24WmX6xlv5PT3j2ibccXiJ9x/sCaP2MGRzPNkkO1hJjBIup6ogn3/U3ynbQ6lqdtYI9Ju0IWSNXIt493Ch/dvD1cjxPzLLcCcrU9O50evAm/gFknFiPla6UKqU6ApkUpnwO3L3emphEXtKcK1I/VfzCFDJ/7PUnOKVBiLwbQWZjSfhdLtdzdwovGgklr4XmicpEL//k5HO9zTjXd8eEL6Yo0ik1Kk/Skm9226B9rQnL6Od9WgwIDAQAB",
   "icons": {
-    "16": "assets/icon-16.png",
-    "32": "assets/icon-32.png",
-    "48": "assets/icon-48.png",
-    "128": "assets/icon-128.png"
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
   },
   "permissions": [
     "https://workflowy.com/*",
+    "declarativeNetRequest",
     "declarativeContent",
     "activeTab"
   ],
@@ -20,13 +22,25 @@
       "background/background.js"
     ]
   },
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "ruleset",
+      "enabled": true,
+      "path": "rules.json"
+    }]
+  },
+  "web_accessible_resources": [
+    "https://workflowy.com/*",
+    "assets/icons/icon-32.png",
+    "content/content.css"
+  ],
   "content_scripts": [
     {
       "matches": ["https://workflowy.com/*"],
       "all_frames": false,
       "run_at": "document_idle",
       "js": [
-        "content/multiflow.js"
+        "content/content.js"
       ]
     }
   ],
@@ -34,7 +48,7 @@
     "default_popup": "popup/popup.html",
     "default_title": "WorkFlowy MultiFlow",
     "default_icon": {
-      "32": "assets/icon-32.png"
+      "32": "assets/icons/icon-32.png"
     }
   }
 }
