@@ -13,6 +13,7 @@ export default class Page {
   constructor () {
     this.frames = []
     this.container = null
+    // this.onFrameNavigated = debounce(this.onFrameNavigated)
   }
 
   get numVisible () {
@@ -103,6 +104,9 @@ export default class Page {
     // count
     document.body.setAttribute('data-frames', String(this.numVisible))
 
+    // title
+    this.updateTitle()
+
     // layout
     if (this.container) {
       const layout = document.body.getAttribute('data-layout')
@@ -112,13 +116,16 @@ export default class Page {
     }
   }
 
+  updateTitle () {
+    document.title = getTitle(this.getFramesInfo())
+  }
+
   onFrameLoaded (frame) {
-    if (frame.index === 1) {
-      // chrome.runtime.sendMessage({ command: 'frameloaded', value: frame.index })
-    }
+    this.updateTitle()
+    chrome.runtime.sendMessage({ command: 'frameloaded', value: frame.index })
   }
 
   onFrameNavigated () {
-    document.title = getTitle(this.getFramesInfo())
+    this.updateTitle()
   }
 }

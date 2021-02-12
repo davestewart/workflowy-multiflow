@@ -94,24 +94,24 @@ window.app = new Vue({
       await runCommand('init', settings)
 
       // get settings from page
-      const data = await this.getData()
-      this.settings.links = data.links
-      this.settings.layout = data.layout
-      this.sessions.current = data.frames
+      this.getData()
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
     // body data
     // ---------------------------------------------------------------------------------------------------------------------
 
+    async getData () {
+      const data = await runCommand('getData')
+      this.settings.links = data.links
+      this.settings.layout = data.layout
+      this.sessions.current = data.frames
+    },
+
     setData (key, value) {
       return runCommand('setData', { [key]: value }).then(() => {
         storage.set('settings', this.settings)
       })
-    },
-
-    getData () {
-      return runCommand('getData')
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
@@ -141,8 +141,9 @@ window.app = new Vue({
     },
 
     onMessage (message) {
-      alert(JSON.stringify(message))
-      console.log(message)
+      if (message.command === 'frameloaded') {
+        return this.getData()
+      }
     },
   },
 })
