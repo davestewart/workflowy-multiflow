@@ -67,9 +67,9 @@
         <div class="col-8">
           <label class="form-label">
             <template v-if="sessions.saved">
-              <a href="#" @click.prevent="loadSession" class="tooltip" :data-tooltip="savedSessionTitle">Load previous</a> |
+              <a href="#" @click.prevent="loadSession" :class="{ tooltip: !!savedSessionTitle }" :data-tooltip="savedSessionTitle">Load previous</a> |
             </template>
-            <a href="#" @click.prevent="saveSession" class="tooltip" :data-tooltip="currentSessionTitle">Save current</a>
+            <a href="#" @click.prevent="saveSession" :class="{ tooltip: !!currentSessionTitle }" :data-tooltip="currentSessionTitle">Save current</a>
           </label>
         </div>
 

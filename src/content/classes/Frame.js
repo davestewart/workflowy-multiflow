@@ -1,12 +1,6 @@
 import { WF_URL } from '../helpers/config.js'
-import {
-  stop,
-  isModifier,
-  runWhen,
-  checkLoaded,
-  getDoc,
-  getPage,
-} from '../helpers/utils.js'
+import { isModifier, runWhen, stop } from '../../utils/dom.js'
+import { checkLoaded, getDoc, getPage } from '../helpers/utils.js'
 
 /**
  * Frame class
@@ -143,9 +137,11 @@ export default class Frame {
 
   getData () {
     if (this.window) {
+      const doc = getDoc(this.window)
       return {
-        title: getDoc(this.window).title.replace(' - WorkFlowy', ''),
+        title: doc.title.replace(' - WorkFlowy', ''),
         url: this.window.location.href,
+        mode: doc.querySelector('.project.board') ? 'board' : 'list',
       }
     }
     return {}
