@@ -33,7 +33,7 @@
   "web_accessible_resources": [
     "https://workflowy.com/*",
     "https://beta.workflowy.com",
-    "assets/icons/icon-32.png",
+    "assets/icons/*",
     "content/content.css"
   ],
   "content_scripts": [
@@ -53,7 +53,7 @@
     "default_popup": "popup/popup.html",
     "default_title": "WorkFlowy MultiFlow",
     "default_icon": {
-      "32": "assets/icons/icon-32.png"
+      "32": "assets/icons/icon-16.png"
     }
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; img-src * 'self' data: https: http: chrome: chrome://favicon/"

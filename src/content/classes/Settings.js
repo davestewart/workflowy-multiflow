@@ -1,7 +1,7 @@
 /**
  * Data class
  */
-export default class Data {
+export default class Settings {
   /**
    * Loads frame data
    * @returns {{urls: string[], titles: string[], layout: string}}

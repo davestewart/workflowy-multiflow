@@ -1,4 +1,4 @@
-import { WF_URL } from '../helpers/settings.js'
+import { WF_URL } from '../helpers/config.js'
 import {
   stop,
   isModifier,
@@ -25,8 +25,11 @@ export default class Frame {
   constructor (page, index) {
     this.page = page
     this.index = index
-    this.window = null
     this.element = null
+  }
+
+  get window () {
+    return this.element.contentWindow
   }
 
   create (src) {
@@ -36,7 +39,6 @@ export default class Frame {
 
     // add load handler
     this.element.addEventListener('load', () => {
-      this.window = this.element.contentWindow
       const document = getDoc(this.window)
       return runWhen(checkLoaded(document), () => this.init())
     })
@@ -52,6 +54,15 @@ export default class Frame {
     const element = this.element
     const document = getDoc(element)
     const wfPage = getPage(frame)
+
+    // alert
+    this.page.onFrameLoaded(this)
+
+    // alert page when navigation changes
+    const target = document.querySelector('.page')
+    const config = { childList: true }
+    const observer = new MutationObserver(() => this.page.onFrameNavigated())
+    observer.observe(target, config)
 
     // styles
     // addStyles(document, `

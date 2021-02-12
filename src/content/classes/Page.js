@@ -1,6 +1,7 @@
-import { WF_WIDTH } from '../helpers/settings.js'
+import { WF_WIDTH } from '../helpers/config.js'
 import html from '../content.html'
 import Frame from './Frame.js'
+import { getTitle } from '../../utils/common.js'
 
 /**
  * Manager class
@@ -19,9 +20,16 @@ export default class Page {
   }
 
   setup () {
-    document.querySelector('[rel="shortcut icon"]').setAttribute('href', chrome.runtime.getURL('assets/icons/icon-32.png'))
+    // setup page
+    // need to set up icon first; doc.write seems to prevent it being set after
+    document.querySelector('[rel="shortcut icon"]').setAttribute('href', chrome.runtime.getURL('assets/icons/icon-48.png'))
     document.write(html)
+
+    // setup page
     this.container = document.querySelector('main')
+    this.addFrame(document.location.href)
+
+    // prevent flash of unstyled frames
     this.container.style.display = 'none'
     setTimeout(() => {
       this.container.style.display = ''
@@ -38,26 +46,40 @@ export default class Page {
     const element = frame.create(src)
     this.container.appendChild(element)
     this.update()
+    return frame
   }
 
   removeFrame (frame) {
-    const index = this.getFrameIndex(frame)
-    this.frames.splice(index, 1)
-    this.container.removeChild(frame.element)
-    this.update()
+    if (this.numVisible > 1) {
+      const index = this.getFrameIndex(frame)
+      this.frames.splice(index, 1)
+      this.container.removeChild(frame.element)
+      this.update()
+    }
   }
 
   hideFrame (frame) {
-    const index = this.getFrameIndex(frame)
-    this.frames.splice(index, 1)
-    this.frames.push(frame)
-    frame.hide()
-    this.update()
+    if (this.numVisible > 1) {
+      const index = this.getFrameIndex(frame)
+      this.frames.splice(index, 1)
+      this.frames.push(frame)
+      frame.hide()
+      this.update()
+    }
+  }
+
+  getFramesInfo () {
+    return this.frames
+      .filter(frame => frame.isVisible())
+      .map(frame => frame.getData())
   }
 
   load (frame, href, hasModifier) {
     const hasNext = this.getFrameIndex(frame) < this.numVisible - 1
-    const loadNext = (hasNext && !hasModifier) || (!hasNext && hasModifier)
+    const loadSame = !!document.querySelector('[data-links="in-place"]')
+    const loadNext = loadSame
+      ? hasModifier
+      : (hasNext && !hasModifier) || (!hasNext && hasModifier)
     loadNext
       ? this.loadNextFrame(frame, href)
       : frame.load(href)
@@ -88,8 +110,15 @@ export default class Page {
         ? (WF_WIDTH * this.numVisible) + 'px'
         : 'auto'
     }
+  }
 
-    // trigger save
-    document.dispatchEvent(new Event('multiflow:update'))
+  onFrameLoaded (frame) {
+    if (frame.index === 1) {
+      // chrome.runtime.sendMessage({ command: 'frameloaded', value: frame.index })
+    }
+  }
+
+  onFrameNavigated () {
+    document.title = getTitle(this.getFramesInfo())
   }
 }

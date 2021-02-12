@@ -3,78 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <title>WorkFlowy MultiFlow</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap">
   <link rel="stylesheet" href="../assets/vendor/spectre.min.css">
   <link rel="stylesheet" href="popup.css">
   <script src="../assets/vendor/mac-fix.js"></script>
   <script src="../assets/vendor/vue.js"></script>
 </head>
 <body>
-<main id="app">
-  <h3>
-    <img src="../assets/icons/icon-128.png" width="38" height="38">
-    <span>WorkFlowy MultiFlow</span>
-  </h3>
-  <form class="form-horizontal form-horizontal">
+<div id="app">
+  <header class="header">
+    <a class="header__icon" href="https://davestewart.co.uk/products/workflowy-multiflow" target="_blank">
+      <img src="../assets/icons/icon-128.png">
+    </a>
+    <h3 class="header__text">WorkFlowy <strong>MultiFlow</strong></h3>
+  </header>
 
-    <!-- layout -->
-    <div class="form-group ">
-      <div class="col-4">
-        <label class="form-label">Layout</label>
-      </div>
-      <div class="col-8">
-        <label class="form-radio">
-          <input v-model="layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit to screen
-        </label>
-        <label class="form-radio">
-          <input v-model="layout" value="fit-content" type="radio" name="layout" checked=""><i class="form-icon"></i> Fit to content
-        </label>
-        <label class="form-radio">
-          <input v-model="layout" value="fit-left" type="radio" name="layout" checked=""><i class="form-icon"></i> Left-hand navigation
-        </label>
-      </div>
-    </div>
+  <main class="main hidden">
+    <form class="form-horizontal form-horizontal">
 
-    <!-- layout -->
-    <div class="form-group ">
-      <div class="col-4">
-        <label class="form-label">Links</label>
-      </div>
-      <div class="col-8">
-        <label class="form-radio">
-          <input v-model="links" value="on-right" type="radio" name="links" checked=""><i class="form-icon"></i> Open on right
-        </label>
-        <label class="form-radio">
-          <input v-model="links" value="in-place" type="radio" name="links"><i class="form-icon"></i> Open in place
-        </label>
-      </div>
-    </div>
-
-    <!-- saved -->
-    <div class="form-group" style="margin-top: 1em">
-      <div class="col-4">
-        <label class="form-label">Sessions</label>
-      </div>
-      <div class="col-8">
-        <div class="form-group mt-1">
-          <select v-model="sessionIndex" class="form-select select-sm" :disabled="sessions.length === 0">
-            <option :value="-1">Choose session</option>
-            <option v-for="(session, index) in sessions" :value="index">{{ session.title }}</option>
-          </select>
+      <!-- layout -->
+      <div class="form-group ">
+        <div class="col-4">
+          <label class="form-label">Layout</label>
         </div>
-        <div class="btn-group btn-group-block">
-          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Load</button>
-          <button type="button" class="btn-sm btn btn-primary">Save</button>
-          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Update</button>
-          <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Delete</button>
+        <div class="col-8">
+          <label class="form-radio">
+            <input v-model="settings.layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit to
+            screen
+          </label>
+          <label class="form-radio">
+            <input v-model="settings.layout" value="fit-content" type="radio" name="layout" checked=""><i
+            class="form-icon"></i>
+            Fit to content
+          </label>
+          <label class="form-radio">
+            <input v-model="settings.layout" value="fit-left" type="radio" name="layout" checked=""><i class="form-icon"></i>
+            Left-hand navigation
+          </label>
         </div>
       </div>
-    </div>
 
+      <!-- layout -->
+      <div class="form-group ">
+        <div class="col-4">
+          <label class="form-label">Links</label>
+        </div>
+        <div class="col-8">
+          <label class="form-radio">
+            <input v-model="settings.links" value="in-place" type="radio" name="links"><i class="form-icon"></i> Open in place
+          </label>
+          <label class="form-radio">
+            <input v-model="settings.links" value="on-right" type="radio" name="links" checked=""><i class="form-icon"></i>
+            Open on right
+          </label>
+        </div>
+      </div>
 
-  </form>
-</main>
+      <!-- sessions -->
+      <div class="form-group" style="margin-top: 1em">
+        <div class="col-4">
+          <label class="form-label">Session</label>
+        </div>
+
+        <div class="col-8">
+          <label class="form-label">
+            <template v-if="sessions.saved">
+              <a href="#" @click.prevent="loadSession" class="tooltip" :data-tooltip="savedSessionTitle">Load previous</a> |
+            </template>
+            <a href="#" @click.prevent="saveSession" class="tooltip" :data-tooltip="currentSessionTitle">Save current</a>
+          </label>
+        </div>
+
+        <!--
+        <div class="col-8">
+          <div class="form-group mt-1">
+            <select v-model="sessionIndex" class="form-select select-sm" :disabled="sessions.length === 0">
+              <option :value="-1">Choose session</option>
+              <option v-for="(session, index) in sessions" :value="index">{{ session.title }}</option>
+            </select>
+          </div>
+          <div class="btn-group btn-group-block">
+            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Load
+            </button>
+            <button type="button" class="btn-sm btn btn-primary">Save</button>
+            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Update
+            </button>
+            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Delete
+            </button>
+          </div>
+        </div>
+        -->
+      </div>
+
+      <!--
+      <div class="form-group">
+        <div class="col-12">
+          <label class="form-label text-right">
+            <a target="_blank" href="https://davestewart.co.uk/products/workflowy-multiflow">Home page</a>
+            | <a href="#" @click="reload">Reload</a>
+          </label>
+        </div>
+      </div>
+      -->
+
+    </form>
+<!--    <div class="loading loading-lg"></div>-->
+  </main>
+</div>
 <script type="module" src="popup.js"></script>
 </body>
 </html>

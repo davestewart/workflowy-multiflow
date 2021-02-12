@@ -1,93 +1,83 @@
-import { WF_URL } from '../helpers/settings.js'
+import { WF_URL } from '../helpers/config.js'
 
 /**
  * Application class
  *
- * @property {boolean}  loadState
- * @property {Page}     page
- * @property {Data}     data
+ * @property {boolean}    loadState
+ * @property {Page}       page
  */
 export default class App {
   /**
    * Application class
    *
-   * @param {Page}    page
-   * @param {Data}    data
+   * @param {Page}        page
    */
-  constructor (page, data) {
-    this.loadState = null
+  constructor (page) {
     this.page = page
-    this.data = data
+    this.initialized = false
   }
 
-  start () {
-    // only load if top window
-    if (window !== window.top) {
-      return
-    }
-
-    // initialize
-    if (!this.loadState) {
-      this.loadState = 'initializing'
-      console.log('MultiFlow is initializing...')
-      this.init()
-    }
-
-    // already running!
-    else {
-      console.log('MultiFlow is already ' + this.loadState + '...')
-    }
-
-    // return state
-    return this.loadState
-  }
-
-  init () {
-    // state
-    this.page.setup()
-    this.load()
-
-    // flags
-    this.loadState = 'loaded'
-    location.replace(WF_URL + '/#multiflow')
-
-    // saving
-    const save = this.save.bind(this)
-    document.addEventListener('multiflow:update', save)
-    setInterval(save, 5000)
-  }
-
-  setup () {
-    this.page.container = document.querySelector('main')
-  }
-
-  load () {
-    if (this.loadState !== 'loaded') {
-      const saved = this.data.load()
-      const current = location.href
-      const urls = saved.urls && saved.urls.length
-        ? saved.urls
-        : [current, current]
-      urls.forEach(url => this.page.addFrame(url))
-      this.setLayout(saved.layout)
-    }
-    else {
-      console.warn('MultiFlow has already loaded data')
+  init (settings) {
+    if (window === window.top) {
+      if (!this.initialized) {
+        this.page.setup()
+        this.setData({
+          ...settings,
+          name: 'multiflow',
+        })
+        this.initialized = true
+        return true
+      }
+      return false
     }
   }
 
-  save () {
-    return this.data.save(this.page.frames, this.getLayout())
-  }
+  setData (data = {}) {
+    // data
+    const { name, layout, links, urls } = data
 
-  setLayout (value) {
-    if (value) {
-      document.body.setAttribute('data-layout', value)
+    // name
+    if (name) {
+      location.replace(WF_URL + '/#' + name)
+    }
+
+    // layout
+    if (layout) {
+      document.body.setAttribute('data-layout', layout)
       this.page.update()
     }
+
+    // layout
+    if (links) {
+      document.body.setAttribute('data-links', links)
+    }
+
+    // urls
+    if (urls) {
+      if (Array.isArray(urls) && urls.length > 0) {
+        const max = Math.max(urls.length, this.page.numVisible)
+        for (let i = 0; i < max; i++) {
+          const frame = this.page.frames[i]
+          const url = urls[i]
+          if (url) {
+            frame
+              ? frame.load(url)
+              : this.page.addFrame(url)
+          }
+          else {
+            this.page.hideFrame(frame)
+          }
+        }
+      }
+    }
   }
 
-  getLayout () {
-    return document.body.getAttribute('data-layout')
+  getData () {
+    return {
+      name: location.hash.substr(1),
+      links: document.body.getAttribute('data-links'),
+      layout: document.body.getAttribute('data-layout'),
+      frames: this.page.getFramesInfo(),
+    }
   }
 }
