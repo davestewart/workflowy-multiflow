@@ -1,7 +1,6 @@
 import './popup.scss'
 import { runCommand } from './utils.js'
-import { storage } from '../utils/storage.js'
-import { getTitle } from '../utils/common.js'
+import { getTitle, Settings, Session } from '../utils/app.js'
 
 window.app = new Vue({
   el: '#app',
@@ -65,7 +64,7 @@ window.app = new Vue({
 
     // set up watch
     Object.keys(this.settings).forEach(key => {
-      this.$watch(`settings.${key}`, value => this.setData(key, value))
+      this.$watch(`settings.${key}`, value => this.setState(key, value))
     })
 
     // listen for any messages
@@ -82,35 +81,29 @@ window.app = new Vue({
   methods: {
     async init () {
       // always load previous session
-      const session = storage.get('session')
+      const session = Session.get()
       if (Array.isArray(session)) {
         this.sessions.saved = session
       }
 
-      // need to also load settings here
-      const settings = storage.get('settings')
-
-      // run the page start script
-      await runCommand('init', settings)
-
-      // get settings from page
-      this.getData()
+      // get current page state
+      await this.getState()
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
     // body data
     // ---------------------------------------------------------------------------------------------------------------------
 
-    async getData () {
-      const data = await runCommand('getData')
+    async getState () {
+      const data = await runCommand('getState')
       this.settings.links = data.links
       this.settings.layout = data.layout
       this.sessions.current = data.frames
     },
 
-    setData (key, value) {
-      return runCommand('setData', { [key]: value }).then(() => {
-        storage.set('settings', this.settings)
+    setState (key, value) {
+      return runCommand('setState', { [key]: value }).then(() => {
+        Settings.set(this.settings)
       })
     },
 
@@ -119,16 +112,16 @@ window.app = new Vue({
     // ---------------------------------------------------------------------------------------------------------------------
 
     loadSession () {
-      const session = storage.get('session')
+      const session = Session.get()
       if (Array.isArray(session)) {
         this.sessions.current = session
         const urls = session.map(frame => frame.url)
-        return this.setData('urls', urls)
+        return this.setState('urls', urls)
       }
     },
 
     async saveSession () {
-      storage.set('session', this.sessions.current)
+      Session.set(this.sessions.current)
       this.sessions.saved = this.sessions.current
     },
 
@@ -142,7 +135,7 @@ window.app = new Vue({
 
     onMessage (message) {
       if (message.command === 'frameloaded') {
-        return this.getData()
+        return this.getState()
       }
     },
   },

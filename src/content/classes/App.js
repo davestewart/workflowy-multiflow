@@ -1,4 +1,8 @@
 import { WF_URL } from '../helpers/config.js'
+import { addListeners, checkLoaded } from '../helpers/dom.js'
+import { runWhen } from '../../utils/dom.js'
+import Page from './Page.js'
+import { Settings } from '../../utils/app.js'
 
 /**
  * Application class
@@ -12,27 +16,53 @@ export default class App {
    *
    * @param {Page}        page
    */
-  constructor (page) {
-    this.page = page
-    this.initialized = false
+  constructor () {
+    // debug
+    console.log('MultiFlow is running...')
+
+    // page container
+    this.page = new Page()
+
+    // update with stored settings
+    const settings = Settings.get()
+    this.setState(settings)
+
+    // init when loaded
+    runWhen(checkLoaded(document), () => this.init())
   }
 
-  init (settings) {
-    if (window === window.top) {
-      if (!this.initialized) {
-        this.page.setup()
-        this.setData({
-          ...settings,
-          name: 'multiflow',
-        })
-        this.initialized = true
-        return true
+  init () {
+    // debug
+    console.log('MultiFlow is initializing...')
+
+    // monitor clicks
+    addListeners(window, (_frame, url, hasModifier) => {
+      if (hasModifier) {
+        const settings = {
+          urls: [window.location.href, url],
+        }
+        this.setup(settings)
       }
-      return false
-    }
+      else {
+        window.location.href = url
+      }
+    })
   }
 
-  setData (data = {}) {
+  setup (settings) {
+    // page
+    console.log('MultiFlow is setting up frames...')
+    this.page.setup()
+
+    // frames
+    console.log('MultiFlow is loading frames...')
+    this.setState({
+      ...settings,
+      name: 'multiflow',
+    })
+  }
+
+  setState (data = {}) {
     // data
     const { name, layout, links, urls } = data
 
@@ -44,7 +74,9 @@ export default class App {
     // layout
     if (layout) {
       document.body.setAttribute('data-layout', layout)
-      this.page.update()
+      if (this.page.numVisible) {
+        this.page.update()
+      }
     }
 
     // layout
@@ -72,7 +104,7 @@ export default class App {
     }
   }
 
-  getData () {
+  getState () {
     return {
       name: location.hash.substr(1),
       links: document.body.getAttribute('data-links'),

@@ -1,7 +1,7 @@
 import { WF_WIDTH } from '../helpers/config.js'
 import html from '../content.html'
 import Frame from './Frame.js'
-import { getTitle } from '../../utils/common.js'
+import { getTitle } from '../../utils/app.js'
 
 /**
  * Manager class

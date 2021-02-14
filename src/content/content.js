@@ -1,29 +1,27 @@
 // imports
 import './content.scss'
-import Page from './classes/Page.js'
 import App from './classes/App.js'
 
-// instances
-const page = new Page()
-const app = new App(page)
+// global reference
+let app
 
-// debug
-console.log('MultiFlow is ready...')
+// only run in top frame
+if (window === window.top) {
+  // instances
+  app = new App()
 
-// commands
-chrome.runtime.onMessage.addListener(function (request = {}, _sender, callback) {
-  switch (request.command) {
-    case 'init':
-      return callback(app.init(request.value))
+  // commands
+  chrome.runtime.onMessage.addListener(function (request = {}, _sender, callback) {
+    switch (request.command) {
+      case 'getState':
+        return callback(app.getState())
 
-    case 'getData':
-      return callback(app.getData())
+      case 'setState':
+        return callback(app.setState(request.value))
 
-    case 'setData':
-      return callback(app.setData(request.value))
-
-    default:
-      // eslint-disable-next-line node/no-callback-literal
-      return callback('Unknown request')
-  }
-})
+      default:
+        // eslint-disable-next-line node/no-callback-literal
+        return callback('Unknown request')
+    }
+  })
+}

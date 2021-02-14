@@ -1,6 +1,6 @@
 import { WF_URL } from '../helpers/config.js'
-import { isModifier, runWhen, stop } from '../../utils/dom.js'
-import { checkLoaded, getDoc, getPage } from '../helpers/utils.js'
+import { isModifier, runWhen } from '../../utils/dom.js'
+import { checkLoaded, getDoc, addListeners } from '../helpers/dom.js'
 
 /**
  * Frame class
@@ -13,11 +13,11 @@ import { checkLoaded, getDoc, getPage } from '../helpers/utils.js'
 export default class Frame {
   /**
    *
-   * @param {Page}    page
+   * @param {Page}    parent
    * @param {number}  index
    */
-  constructor (page, index) {
-    this.page = page
+  constructor (parent, index) {
+    this.parent = parent
     this.index = index
     this.element = null
   }
@@ -43,60 +43,20 @@ export default class Frame {
 
   init () {
     // variables
-    const page = this.page
-    const frame = this.window
+    const parent = this.parent
     const element = this.element
     const document = getDoc(element)
-    const wfPage = getPage(frame)
+    const page = document.querySelector('.page')
 
-    // alert
-    this.page.onFrameLoaded(this)
+    // let popup know, in case it is open
+    parent.onFrameLoaded(this)
 
-    // alert page when navigation changes
-    const target = document.querySelector('.page')
-    const config = { childList: true }
-    const observer = new MutationObserver(() => this.page.onFrameNavigated())
-    observer.observe(target, config)
+    // monitor navigation changes
+    const observer = new MutationObserver(() => parent.onFrameNavigated())
+    observer.observe(page, { childList: true })
 
-    // styles
-    // addStyles(document, `
-    //   .page {
-    //     padding: 24px 46px;
-    //     align-items: start;
-    //     margin-left: 0;
-    //   }`)
-
-    // duplicate frame handler
-    document.querySelector('.breadcrumbs').addEventListener('click', (event) => {
-      if (event.target.matches('a:last-of-type') && isModifier(event)) {
-        page.loadNextFrame(this, frame.location.href)
-      }
-    })
-
-    // bullet handler
-    wfPage.addEventListener('click', (event) => {
-      const selector = 'a.bullet'
-      const target = event.target
-      const link = target.matches(selector)
-        ? target
-        : target.closest(selector)
-      if (link && isModifier(event)) {
-        page.loadNextFrame(this, WF_URL + link.getAttribute('href'))
-        stop(event)
-      }
-    }, { capture: true })
-
-    // link handler
-    wfPage.addEventListener('click', (event) => {
-      const el = event.target
-      if (el.tagName === 'A') {
-        const href = el.getAttribute('href')
-        if (href.startsWith(WF_URL)) {
-          page.load(this, href, isModifier(event))
-          stop(event)
-        }
-      }
-    }, { capture: true })
+    // listeners
+    addListeners(this.window, this.onClick.bind(this))
 
     // close button
     if (this.index > 0) {
@@ -107,10 +67,16 @@ export default class Frame {
       button.innerHTML = '<div class="iconButton _pn8v4l"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke-linecap="round" stroke="#b7bcbf" style="position: relative;"><line x1="1" y1="1" x2="19" y2="19"></line><line x1="19" y1="1" x2="1" y2="19"></line></svg></div>'
       button.addEventListener('click', (event) => {
         isModifier(event)
-          ? page.removeFrame(this)
-          : page.hideFrame(this)
+          ? parent.removeFrame(this)
+          : parent.hideFrame(this)
       })
     }
+  }
+
+  onClick (type, href, hasModifier) {
+    type === 'link'
+      ? this.parent.load(this, href, hasModifier)
+      : this.parent.loadNextFrame(this, href)
   }
 
   load (href) {
