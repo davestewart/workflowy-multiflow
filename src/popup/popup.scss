@@ -1,7 +1,26 @@
+// ---------------------------------------------------------------------------------------------------------------------
+// colors
+// ---------------------------------------------------------------------------------------------------------------------
+
+// greys
+$grey-lightest: #f6f5f7;
+$grey-lighter: #d9dfe2;
+$grey-light: #b7c4cf;
+$grey-darker: #434e51;
 $black: #2a3135;
 
+// colours
+$blue: #428ab3;
+
+// other
+$padding-button: .2rem .5rem;
+
+// ---------------------------------------------------------------------------------------------------------------------
+// layout
+// ---------------------------------------------------------------------------------------------------------------------
+
 body {
-  width: 400px;
+  width: 450px;
   font-size: 13px;
   padding: 1.5em;
   user-select: none;
@@ -22,14 +41,15 @@ body {
     display: block;
     img {
       display: block;
-      width: 38px;
-      height: 38px;
+      width: 48px;
+      height: 48px;
     }
   }
 
   &__text {
     display: block;
     margin: 0 0 0 .4em;
+    font-size: 1.7rem;
   }
 }
 
@@ -43,6 +63,26 @@ body {
   }
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// formatting
+// ---------------------------------------------------------------------------------------------------------------------
+
+hr {
+  border: none;
+  margin: .75rem 0;
+  background: $grey-lighter;
+  height: 1px;
+}
+
+a:active {
+  box-shadow: none;
+}
+
+a[disabled] {
+  text-decoration: none;
+  color: $grey-lighter;
+}
+
 .loading {
   position: fixed;
   left: 0;
@@ -50,6 +90,10 @@ body {
   top: 0;
   bottom: 0;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// forms
+// ---------------------------------------------------------------------------------------------------------------------
 
 form {
   padding: 0 !important;
@@ -71,4 +115,69 @@ form {
 
 .form-select.select-sm {
   font-size: 13px;
+}
+
+.form-radio:hover {
+  color: $blue;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// elements
+// ---------------------------------------------------------------------------------------------------------------------
+
+.sessions {
+  padding: .2rem 0;
+  border-bottom: 1px solid $grey-lighter;
+  margin-bottom: 1em;
+
+  &__save {
+    display: inline-block;
+    margin: .4rem .5rem;
+  }
+}
+
+.session {
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .25em;
+    border-radius: 4px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &:hover {
+      background: $grey-lightest;
+      color: $blue;
+    }
+  }
+
+  &__link {
+    padding: $padding-button;
+    padding-right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__item:hover &__remove {
+    display: block;
+  }
+
+  &__remove {
+    display: none;
+    padding: $padding-button;
+    font-size: 1.3em;
+    line-height: 1em;
+    color: $grey-light;
+
+    &:hover {
+      background-color: rgba($grey-darker, 0.1);
+      color: $blue;
+    }
+  }
+}
+
+.home-link {
+  text-align: right;
+  font-size: .7em;
 }

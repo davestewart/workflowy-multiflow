@@ -1,7 +1,6 @@
+import { getTitle } from '../../utils/app.js'
 import { WF_WIDTH } from '../helpers/config.js'
 import Frame from './Frame.js'
-import { getTitle } from '../../utils/app.js'
-import { getDoc } from '../helpers/dom.js'
 
 /**
  * Manager class
@@ -38,7 +37,7 @@ export default class Page {
     multiflow.appendChild(this.container)
   }
 
-  switchApp (isMultiFlow, closedFrame) {
+  switchMode (isMultiFlow, closedFrame) {
     // if switching to workflowy, show the open frame
     if (!isMultiFlow) {
       const openFrame = this.getVisibleFrames().find(frame => frame !== closedFrame)
@@ -46,7 +45,7 @@ export default class Page {
     }
 
     // values
-    const app = isMultiFlow
+    const mode = isMultiFlow
       ? 'multiflow'
       : 'workflowy'
     const icon = isMultiFlow
@@ -58,7 +57,7 @@ export default class Page {
 
     // update
     document.querySelector('[rel*="icon"]').setAttribute('href', icon)
-    document.body.setAttribute('data-app', app)
+    document.body.setAttribute('data-mode', mode)
     document.title = title
   }
 
@@ -82,7 +81,7 @@ export default class Page {
       this.update()
     }
     else {
-      this.switchApp(false, frame)
+      this.switchMode(false, frame)
     }
   }
 
@@ -95,7 +94,7 @@ export default class Page {
       this.update()
     }
     else {
-      this.switchApp(false, frame)
+      this.switchMode(false, frame)
     }
   }
 
@@ -103,8 +102,15 @@ export default class Page {
     return this.frames.filter(frame => frame.isVisible())
   }
 
-  getFramesInfo () {
-    return this.getVisibleFrames().map(frame => frame.getData())
+  getInfo () {
+    const frames = this.getVisibleFrames().map(frame => frame.getData())
+    const title = getTitle(frames)
+    const name = title.toLowerCase().replace(/\W+/g, '-')
+    return {
+      urls: frames.map(frame => frame.url),
+      title,
+      name,
+    }
   }
 
   load (frame, href, hasModifier) {
@@ -149,7 +155,7 @@ export default class Page {
   }
 
   updateTitle () {
-    document.title = getTitle(this.getFramesInfo())
+    document.title = this.getInfo().title
   }
 
   onFrameLoaded (frame) {

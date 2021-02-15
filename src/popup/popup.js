@@ -1,59 +1,25 @@
 import './popup.scss'
-import { runCommand } from './utils.js'
-import { getTitle, Settings, Session } from '../utils/app.js'
+import { runCommand } from '../utils/chrome.js'
+import { Sessions } from '../utils/app.js'
 
 window.app = new Vue({
   el: '#app',
 
   data () {
     return {
+      state: {},
+      sessions: [],
       settings: {
         layout: 'fit-screen',
         links: 'in-place',
       },
-      sessions: {
-        current: null,
-        saved: null,
-      },
-      /*
-      options: {
-        session: null,
-        sessionIndex: -1,
-        sessions: [
-          { id: 1, title: 'Session 01' },
-          { id: 2, title: 'Session 02' },
-        ],
-      },
-      */
     }
   },
 
   computed: {
-    currentSessionTitle () {
-      return getTitle(this.sessions.current)
+    canSave () {
+      return this.state.mode === 'multiflow'
     },
-
-    savedSessionTitle () {
-      return getTitle(this.sessions.saved)
-    },
-
-    /*
-    session () {
-      return this.options.sessions[this.options.sessionIndex]
-    },
-
-    hasSessions () {
-      return this.options.sessions.length > 0
-    },
-
-    hasUnloadedSession () {
-      return true
-    },
-
-    noSelection () {
-      return this.options.sessionIndex === -1
-    },
-    */
   },
 
   mounted () {
@@ -70,6 +36,12 @@ window.app = new Vue({
     // listen for any messages
     chrome.runtime.onMessage.addListener(this.onMessage)
 
+    // always load previous session
+    const sessions = Sessions.get()
+    if (Array.isArray(sessions)) {
+      this.sessions = sessions
+    }
+
     // initialize!
     return this.init()
   },
@@ -80,14 +52,10 @@ window.app = new Vue({
 
   methods: {
     async init () {
-      // always load previous session
-      const session = Session.get()
-      if (Array.isArray(session)) {
-        this.sessions.saved = session
-      }
-
-      // get current page state
-      await this.getState()
+      const state = await this.getState()
+      this.state = state || {}
+      this.settings.links = state.links
+      this.settings.layout = state.layout
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
@@ -95,34 +63,33 @@ window.app = new Vue({
     // ---------------------------------------------------------------------------------------------------------------------
 
     async getState () {
-      const data = await runCommand('getState')
-      this.settings.links = data.links
-      this.settings.layout = data.layout
-      this.sessions.current = data.frames
+      return runCommand('getState')
     },
 
     setState (key, value) {
-      return runCommand('setState', { [key]: value }).then(() => {
-        Settings.set(this.settings)
-      })
+      return runCommand('setState', { [key]: value })
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
     // sessions
     // ---------------------------------------------------------------------------------------------------------------------
 
-    loadSession () {
-      const session = Session.get()
-      if (Array.isArray(session)) {
-        this.sessions.current = session
-        const urls = session.map(frame => frame.url)
-        return this.setState('urls', urls)
-      }
+    async saveSession () {
+      const session = await this.getState()
+      this.sessions.push(session)
+      Sessions.set(this.sessions)
+      await this.setState('name', session.name)
     },
 
-    async saveSession () {
-      Session.set(this.sessions.current)
-      this.sessions.saved = this.sessions.current
+    loadSession (index) {
+      const session = this.sessions[index]
+      return runCommand('setState', session)
+        .then(() => this.init())
+    },
+
+    async removeSession (index) {
+      this.sessions.splice(index, 1)
+      Sessions.set(this.sessions)
     },
 
     // ---------------------------------------------------------------------------------------------------------------------
@@ -141,4 +108,4 @@ window.app = new Vue({
   },
 })
 
-console.log('MultiFlow background loaded')
+console.log('MultiFlow: background loaded')

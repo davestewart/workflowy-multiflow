@@ -1,8 +1,8 @@
-import { WF_URL } from '../helpers/config.js'
 import { addListeners, checkLoaded } from '../helpers/dom.js'
+import { WF_URL } from '../helpers/config.js'
+import { Settings } from '../../utils/app.js'
 import { runWhen } from '../../utils/dom.js'
 import Page from './Page.js'
-import { Settings } from '../../utils/app.js'
 
 /**
  * Application class
@@ -61,7 +61,7 @@ export default class App {
 
   load (settings) {
     console.log('Multiflow: loading urls...')
-    this.page.switchApp(true)
+    this.page.switchMode(true)
     this.setState({
       ...settings,
       name: 'multiflow',
@@ -70,7 +70,7 @@ export default class App {
 
   setState (data = {}) {
     // data
-    const { name, layout, links, urls } = data
+    const { name, layout, links, title, urls } = data
 
     // name
     if (name) {
@@ -78,6 +78,11 @@ export default class App {
       // think it is related to content loading in, but have tried all kinds of workarounds (removing
       // title, src, mounting, etc) but nothing seems to stick
       location.href = '#/' + name
+    }
+
+    // title
+    if (title) {
+      document.title = title
     }
 
     // layout
@@ -95,6 +100,7 @@ export default class App {
 
     // urls
     if (urls) {
+      this.page.switchMode(true)
       if (Array.isArray(urls) && urls.length > 0) {
         const max = Math.max(urls.length, this.page.numVisible)
         for (let i = 0; i < max; i++) {
@@ -115,10 +121,10 @@ export default class App {
 
   getState () {
     return {
-      name: location.hash.substr(1),
+      mode: document.querySelector('body').getAttribute('data-mode'),
       links: document.body.getAttribute('data-links'),
       layout: document.body.getAttribute('data-layout'),
-      frames: this.page.getFramesInfo(),
+      ...this.page.getInfo(),
     }
   }
 }

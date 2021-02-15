@@ -5,7 +5,7 @@ export function getTitle (frames) {
     return frames.map(frame => {
       const title = frame.title
       return title === 'WorkFlowy - Organize your brain.'
-        ? 'WorkFlowy'
+        ? 'Home'
         : title
     }).join(' + ')
   }
@@ -25,12 +25,12 @@ export const Settings = {
   },
 }
 
-export const Session = {
+export const Sessions = {
   get () {
-    return storage.get('session')
+    return storage.get('sessions')
   },
 
   set (value) {
-    storage.set('session', value)
+    storage.set('sessions', value)
   },
 }

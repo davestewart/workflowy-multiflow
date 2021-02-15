@@ -6,6 +6,7 @@ module.exports = {
   },
   globals: {
     chrome: true,
+    Vue: true,
   },
   extends: [
     'standard',

@@ -22,91 +22,74 @@
 
       <!-- layout -->
       <div class="form-group ">
-        <div class="col-4">
+        <div class="col-3">
           <label class="form-label">Layout</label>
         </div>
-        <div class="col-8">
+        <div class="col-9">
           <label class="form-radio">
             <input v-model="settings.layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit to
             screen
           </label>
           <label class="form-radio">
-            <input v-model="settings.layout" value="fit-content" type="radio" name="layout" checked=""><i
-            class="form-icon"></i>
+            <input v-model="settings.layout" value="fit-content" type="radio" name="layout">
+            <i class="form-icon"></i>
             Fit to content
           </label>
           <label class="form-radio">
-            <input v-model="settings.layout" value="fit-left" type="radio" name="layout" checked=""><i class="form-icon"></i>
-            Left-hand navigation
+            <input v-model="settings.layout" value="fit-left" type="radio" name="layout">
+            <i class="form-icon"></i> Left-hand navigation
           </label>
         </div>
       </div>
 
       <!-- layout -->
       <div class="form-group ">
-        <div class="col-4">
+        <div class="col-3">
           <label class="form-label">Links</label>
         </div>
-        <div class="col-8">
+        <div class="col-9">
           <label class="form-radio">
-            <input v-model="settings.links" value="in-place" type="radio" name="links"><i class="form-icon"></i> Open in place
+            <input v-model="settings.links" value="in-place" type="radio" name="links">
+            <i class="form-icon"></i> Open in place
           </label>
           <label class="form-radio">
-            <input v-model="settings.links" value="on-right" type="radio" name="links" checked=""><i class="form-icon"></i>
-            Open on right
+            <input v-model="settings.links" value="on-right" type="radio" name="links">
+            <i class="form-icon"></i> Open on right
           </label>
         </div>
       </div>
+
+      <hr>
 
       <!-- sessions -->
       <div class="form-group" style="margin-top: 1em">
-        <div class="col-4">
-          <label class="form-label">Session</label>
+        <div class="col-3">
+          <label class="form-label">Sessions</label>
         </div>
 
-        <div class="col-8">
-          <label class="form-label">
-            <template v-if="sessions.saved">
-              <a href="#" @click.prevent="loadSession" :class="{ tooltip: !!savedSessionTitle }" :data-tooltip="savedSessionTitle">Load previous</a> |
-            </template>
-            <a href="#" @click.prevent="saveSession" :class="{ tooltip: !!currentSessionTitle }" :data-tooltip="currentSessionTitle">Save current</a>
-          </label>
-        </div>
-
-        <!--
-        <div class="col-8">
-          <div class="form-group mt-1">
-            <select v-model="sessionIndex" class="form-select select-sm" :disabled="sessions.length === 0">
-              <option :value="-1">Choose session</option>
-              <option v-for="(session, index) in sessions" :value="index">{{ session.title }}</option>
-            </select>
+        <div class="col-9">
+          <div v-if="sessions.length" class="sessions">
+            <label v-for="(session, index) in sessions" class="session__item" :title="session.title">
+              <span class="session__link" @click="loadSession(index)">{{ session.title }}</span>
+              <span class="session__remove" @click="removeSession(index)">&times;</span>
+            </label>
           </div>
-          <div class="btn-group btn-group-block">
-            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Load
-            </button>
-            <button type="button" class="btn-sm btn btn-primary">Save</button>
-            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Update
-            </button>
-            <button type="button" class="btn-sm btn btn-primary" v-show="hasSessions" :disabled="noSelection">Delete
-            </button>
-          </div>
+          <a href="#"
+             class="sessions__save"
+             :disabled="!canSave"
+             :title="canSave ? `Save &quot;${state.title}&quot;` : 'Cannot save session without columns to save'"
+             @click.prevent="saveSession"
+          >Save current</a>
         </div>
-        -->
       </div>
 
-      <!--
-      <div class="form-group">
-        <div class="col-12">
-          <label class="form-label text-right">
-            <a target="_blank" href="https://davestewart.co.uk/products/workflowy-multiflow">Home page</a>
-            | <a href="#" @click="reload">Reload</a>
-          </label>
+      <div class="form-group mt-2">
+        <div class="col-12 home-link">
+          <a href="https://davestewart.co.uk/products/workflowy-multiflow" target="_blank">Help...</a>
         </div>
       </div>
-      -->
 
     </form>
-<!--    <div class="loading loading-lg"></div>-->
   </main>
 </div>
 <script type="module" src="popup.js"></script>

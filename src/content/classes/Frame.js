@@ -1,6 +1,6 @@
-import { WF_URL } from '../helpers/config.js'
 import { isModifier, runWhen } from '../../utils/dom.js'
 import { checkLoaded, getDoc, addListeners } from '../helpers/dom.js'
+import { WF_URL } from '../helpers/config.js'
 
 /**
  * Frame class
