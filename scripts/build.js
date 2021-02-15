@@ -1,3 +1,7 @@
+// ---------------------------------------------------------------------------------------------------------------------
+// setup
+// ---------------------------------------------------------------------------------------------------------------------
+
 // core
 import Path from 'path'
 import Fs from 'fs'
@@ -5,12 +9,17 @@ import util from 'util'
 
 // utils
 import mergeOptions from 'merge-options'
+import yargs from 'yargs'
 
 // plugins
 import { string } from 'rollup-plugin-string'
 import scss from 'rollup-plugin-scss'
 import copy from 'rollup-plugin-copy-watch'
 import del from 'rollup-plugin-delete'
+
+// settings
+const args = yargs(process.argv).argv
+const isWatch = args.watch
 
 // ---------------------------------------------------------------------------------------------------------------------
 // utils
@@ -50,7 +59,7 @@ function checkModule (srcFile, trgFile = srcFile) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-// main
+// factory
 // ---------------------------------------------------------------------------------------------------------------------
 
 function bundle (name, options = {}) {
@@ -60,11 +69,10 @@ function bundle (name, options = {}) {
   // html
   const page = checkModule(name + '.html')
   if (page) {
+    const watch = isWatch ? [page.srcAbs] : undefined
     config.plugins.push(
       copy({
-        watch: [
-          page.srcAbs,
-        ],
+        watch,
         targets: [
           { src: page.srcRel, dest: page.trgDir },
         ],
@@ -99,6 +107,10 @@ function bundle (name, options = {}) {
   return config
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------------------------------------------------
+
 export default [
   bundle('background', {
     plugins: [
@@ -107,7 +119,7 @@ export default [
         runOnce: true,
       }),
       copy({
-        watch: 'static',
+        watch: isWatch ? 'static' : undefined,
         targets: [
           { dest: 'dist', src: 'src/assets' },
           { dest: 'dist', src: 'src/manifest.json' },

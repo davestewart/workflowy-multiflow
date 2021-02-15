@@ -2,9 +2,11 @@
   "name": "multiflow-extension",
   "description": "Columns view for WorkFlowy",
   "scripts": {
-    "dev": "rollup -c scripts/build.js --w",
+    "dev": "rollup -c scripts/build.js --watch",
     "build": "rollup -c scripts/build.js",
-    "release": "node scripts/release.js",
+    "clean": "rimraf dist",
+    "zip": "node scripts/zip.js",
+    "release": "npm run clean && npm run build && npm run zip",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dave Stewart",
@@ -19,11 +21,13 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "merge-options": "^3.0.4",
+    "rimraf": "^3.0.2",
     "rollup": "^2.38.5",
     "rollup-plugin-copy-watch": "0.0.1",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-scss": "^2.6.1",
-    "rollup-plugin-string": "^3.0.0"
+    "rollup-plugin-string": "^3.0.0",
+    "yargs": "^16.2.0"
   },
   "dependencies": {
     "vue": "^2.6.12"
