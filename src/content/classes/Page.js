@@ -105,11 +105,11 @@ export default class Page {
   getInfo () {
     const frames = this.getVisibleFrames().map(frame => frame.getData())
     const title = getTitle(frames)
-    const name = title.toLowerCase().replace(/\W+/g, '-')
+    const id = title.toLowerCase().replace(/\W+/g, '-')
     return {
       urls: frames.map(frame => frame.url),
       title,
-      name,
+      id,
     }
   }
 

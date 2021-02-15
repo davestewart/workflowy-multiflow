@@ -1,10 +1,10 @@
 export const storage = {
-  set (name, value) {
-    localStorage.setItem(name, JSON.stringify(value))
+  set (key, value) {
+    localStorage.setItem(key, JSON.stringify(value))
   },
 
-  get (name, defaultValue) {
-    const value = localStorage.getItem(name)
+  get (key, defaultValue) {
+    const value = localStorage.getItem(key)
     return typeof value === 'string'
       ? JSON.parse(value)
       : defaultValue

@@ -64,20 +64,20 @@ export default class App {
     this.page.switchMode(true)
     this.setState({
       ...settings,
-      name: 'multiflow',
+      id: 'multiflow',
     })
   }
 
   setState (data = {}) {
     // data
-    const { name, layout, links, title, urls } = data
+    const { id, layout, links, title, urls } = data
 
-    // name
-    if (name) {
+    // id
+    if (id) {
       // FIXME for some reason, the hash is set, then reset to '/' a few 100 ms after it has updated
       // think it is related to content loading in, but have tried all kinds of workarounds (removing
       // title, src, mounting, etc) but nothing seems to stick
-      location.href = '#/' + name
+      location.href = '#/' + id
     }
 
     // title

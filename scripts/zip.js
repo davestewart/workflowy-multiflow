@@ -11,7 +11,7 @@ if (!fs.existsSync(target)) {
 }
 
 zip({
-  cwd: 'src',
+  cwd: 'dist',
   source: '*',
   destination: `${target}/${file}`,
 }).then(function () {
