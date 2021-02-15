@@ -17,8 +17,17 @@ window.app = new Vue({
   },
 
   computed: {
+    noSaveText () {
+      if (!(this.state.mode === 'multiflow')) {
+        return 'Can only save MultiFlowy sessions'
+      }
+      if (this.sessions.find(session => session.id === this.state.id)) {
+        return 'You have already saved this session'
+      }
+    },
+
     canSave () {
-      return this.state.mode === 'multiflow'
+      return !this.noSaveText
     },
   },
 
@@ -75,10 +84,14 @@ window.app = new Vue({
     // ---------------------------------------------------------------------------------------------------------------------
 
     async saveSession () {
-      const session = await this.getState()
-      this.sessions.push(session)
-      Sessions.set(this.sessions)
-      await this.setState('name', session.name)
+      if (this.canSave) {
+        this.state.hash = this.state.id
+        const session = await this.getState()
+        this.sessions.push(session)
+        Sessions.set(this.sessions)
+        await this.setState('id', session.id)
+        await this.init()
+      }
     },
 
     loadSession (index) {

@@ -74,9 +74,9 @@ export default class App {
 
     // id
     if (id) {
-      // FIXME for some reason, the hash is set, then reset to '/' a few 100 ms after it has updated
-      // think it is related to content loading in, but have tried all kinds of workarounds (removing
-      // title, src, mounting, etc) but nothing seems to stick
+      // FIXME although the hash gets set, it resets to '/' a few 100ms after it has updated
+      // it seems to be related to content loading in, and I can't seem to fix it
+      // so I now force an update of the hash when frames load
       location.href = '#/' + id
     }
 
@@ -121,6 +121,7 @@ export default class App {
 
   getState () {
     return {
+      hash: window.location.hash.substr(2),
       mode: document.querySelector('body').getAttribute('data-mode'),
       links: document.body.getAttribute('data-links'),
       layout: document.body.getAttribute('data-layout'),

@@ -100,21 +100,11 @@ form {
 }
 
 .form-group [class^="col"]:first-of-type {
-  //font-weight: 600;
   color: $black;
-  label:after {
-    margin-left: .1em;
-    //content: ':';
-    opacity: .6;
-  }
 }
 
-.btn-group > button:not(:last-child) {
-  margin-right: 5px;
-}
-
-.form-select.select-sm {
-  font-size: 13px;
+.form-radio {
+  margin-left: .5rem;
 }
 
 .form-radio:hover {
@@ -126,54 +116,49 @@ form {
 // ---------------------------------------------------------------------------------------------------------------------
 
 .sessions {
-  padding: .2rem 0;
+  padding-bottom: .7rem;
   border-bottom: 1px solid $grey-lighter;
   margin-bottom: 1em;
 
   &__save {
     display: inline-block;
-    margin: .4rem .5rem;
+    margin-top: -.1rem;
+    margin-left: 1.2rem;
+    padding: .1rem .4rem;
+    outline: none !important;
+    box-shadow: none !important;
+    &[disabled] {
+      cursor: default;
+    }
   }
 }
 
 .session {
-  &__item {
+  &__text {
     display: flex;
     justify-content: space-between;
-    margin-bottom: .25em;
-    border-radius: 4px;
-    cursor: pointer;
-    overflow: hidden;
-    white-space: nowrap;
-
-    &:hover {
-      background: $grey-lightest;
-      color: $blue;
-    }
   }
 
-  &__link {
-    padding: $padding-button;
-    padding-right: 0;
+  &__title {
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  &__item:hover &__remove {
-    display: block;
-  }
-
-  &__remove {
+  &__delete {
     display: none;
     padding: $padding-button;
     font-size: 1.3em;
     line-height: 1em;
     color: $grey-light;
+    font-weight: bold;
 
     &:hover {
-      background-color: rgba($grey-darker, 0.1);
       color: $blue;
     }
+  }
+
+  &__text:hover &__delete {
+    display: block;
   }
 }
 

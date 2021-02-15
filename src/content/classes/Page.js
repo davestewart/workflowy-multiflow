@@ -158,8 +158,13 @@ export default class Page {
     document.title = this.getInfo().title
   }
 
+  updateHash () {
+    window.location.replace('#/' + this.getInfo().id)
+  }
+
   onFrameLoaded (frame) {
     this.updateTitle()
+    this.updateHash()
     chrome.runtime.sendMessage({ command: 'frameloaded', value: frame.index })
   }
 

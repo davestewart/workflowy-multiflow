@@ -27,7 +27,8 @@
         </div>
         <div class="col-9">
           <label class="form-radio">
-            <input v-model="settings.layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit to
+            <input v-model="settings.layout" value="fit-screen" type="radio" name="layout"><i class="form-icon"></i> Fit
+            to
             screen
           </label>
           <label class="form-radio">
@@ -61,25 +62,30 @@
 
       <hr>
 
-      <!-- sessions -->
-      <div class="form-group" style="margin-top: 1em">
+      <!-- layout -->
+      <div class="form-group ">
         <div class="col-3">
           <label class="form-label">Sessions</label>
         </div>
-
         <div class="col-9">
           <div v-if="sessions.length" class="sessions">
-            <label v-for="(session, index) in sessions" class="session__item" :title="session.title">
-              <span class="session__link" @click="loadSession(index)">{{ session.title }}</span>
-              <span class="session__remove" @click="removeSession(index)">&times;</span>
+            <label v-for="(session, index) in sessions" class="form-radio">
+              <input v-model="state.hash" :value="session.id" type="radio" name="session">
+              <i class="form-icon"></i>
+              <div class="session__text">
+                <span class="session__title" @click="loadSession(index)">{{ session.title }}</span>
+                <span class="session__delete" @click.stop="removeSession(index)">&times;</span>
+              </div>
             </label>
           </div>
-          <a href="#"
-             class="sessions__save"
-             :disabled="!canSave"
-             :title="canSave ? `Save &quot;${state.title}&quot;` : 'Cannot save session without columns to save'"
-             @click.prevent="saveSession"
-          >Save {{ state.title || 'Current' }}</a>
+          <label class="form-label">
+            <a href="#"
+               class="sessions__save"
+               :disabled="!canSave"
+               :title="canSave ? `Save &quot;${state.title}&quot;` : noSaveText"
+               @click.prevent="saveSession"
+            >Save Session</a>
+          </label>
         </div>
       </div>
 
