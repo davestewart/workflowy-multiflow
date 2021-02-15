@@ -49,7 +49,7 @@ export default class Page {
       ? 'multiflow'
       : 'workflowy'
     const icon = isMultiFlow
-      ? chrome.runtime.getURL('assets/icons/icon-48.png')
+      ? chrome.runtime.getURL('assets/icons/icon-16@3x.png')
       : '/media/i/favicon.ico'
     const title = isMultiFlow
       ? getTitle(this.frames)
