@@ -79,7 +79,7 @@
              :disabled="!canSave"
              :title="canSave ? `Save &quot;${state.title}&quot;` : 'Cannot save session without columns to save'"
              @click.prevent="saveSession"
-          >Save current</a>
+          >Save {{ state.title || 'Current' }}</a>
         </div>
       </div>
 

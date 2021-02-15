@@ -102,7 +102,7 @@ window.app = new Vue({
 
     onMessage (message) {
       if (message.command === 'frameloaded') {
-        return this.getState()
+        return this.init()
       }
     },
   },
