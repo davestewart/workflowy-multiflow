@@ -13,12 +13,10 @@ import { Settings } from '../../utils/app.js'
 export default class App {
   /**
    * Application class
-   *
-   * @param {Page}        page
    */
   constructor () {
     // debug
-    console.log('MultiFlow is running...')
+    console.log('MultiFlow: running...')
 
     // page container
     this.page = new Page()
@@ -33,29 +31,37 @@ export default class App {
 
   init () {
     // debug
-    console.log('MultiFlow is initializing...')
+    console.log('MultiFlow: initializing...')
+
+    // initialize page structure
+    this.page.init()
 
     // monitor clicks
-    addListeners(window, (_frame, url, hasModifier) => {
-      if (hasModifier) {
-        const settings = {
-          urls: [window.location.href, url],
-        }
-        this.setup(settings)
-      }
-      else {
-        window.location.href = url
-      }
-    })
+    addListeners(window, this.onItemClick.bind(this))
   }
 
-  setup (settings) {
-    // page
-    console.log('MultiFlow is setting up frames...')
-    this.page.setup()
+  onItemClick (_frame, url, hasModifier) {
+    if (hasModifier) {
+    // determine current item
+      const projectId = document.querySelector('[projectid]').getAttribute('projectid')
+      const itemId = projectId !== 'None'
+        ? projectId.split('-').pop()
+        : ''
 
-    // frames
-    console.log('MultiFlow is loading frames...')
+      // load urls
+      const urls = [WF_URL + '/#' + itemId, url]
+      this.load({ urls })
+    }
+
+    // navigate as usual
+    else {
+      window.location.href = url
+    }
+  }
+
+  load (settings) {
+    console.log('Multiflow: loading urls...')
+    this.page.switchApp(true)
     this.setState({
       ...settings,
       name: 'multiflow',
@@ -68,7 +74,10 @@ export default class App {
 
     // name
     if (name) {
-      location.replace(WF_URL + '/#' + name)
+      // FIXME for some reason, the hash is set, then reset to '/' a few 100 ms after it has updated
+      // think it is related to content loading in, but have tried all kinds of workarounds (removing
+      // title, src, mounting, etc) but nothing seems to stick
+      location.href = '#/' + name
     }
 
     // layout

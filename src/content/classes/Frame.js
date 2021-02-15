@@ -26,10 +26,11 @@ export default class Frame {
     return this.element.contentWindow
   }
 
-  create (src) {
+  create (container, src) {
     // create iframe
     this.element = document.createElement('iframe')
-    this.element.setAttribute('src', src || WF_URL)
+    this.element.setAttribute('src', src || WF_URL + '#/loading')
+    container.appendChild(this.element)
 
     // add load handler
     this.element.addEventListener('load', () => {
@@ -105,7 +106,7 @@ export default class Frame {
     if (this.window) {
       const doc = getDoc(this.window)
       return {
-        title: doc.title.replace(' - WorkFlowy', ''),
+        title: doc.title.replace(' - WorkFlowy', '') || '[ loading ]',
         url: this.window.location.href,
         mode: doc.querySelector('.project.board') ? 'board' : 'list',
       }

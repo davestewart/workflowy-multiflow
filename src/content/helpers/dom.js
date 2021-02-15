@@ -24,7 +24,7 @@ export function addListeners (window, handler) {
   // duplicate frame handler
   document.querySelector('.breadcrumbs').addEventListener('click', (event) => {
     if (event.target.matches('a:last-of-type') && isModifier(event)) {
-      handler('page', window.location.href)
+      handler('page', window.location.href, true)
     }
   })
 
@@ -36,7 +36,7 @@ export function addListeners (window, handler) {
       ? target
       : target.closest(selector)
     if (link && isModifier(event)) {
-      handler('bullet', WF_URL + link.getAttribute('href'))
+      handler('bullet', WF_URL + link.getAttribute('href'), true)
       stop(event)
     }
   }, { capture: true })

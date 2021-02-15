@@ -46,6 +46,9 @@
       "run_at": "document_idle",
       "js": [
         "content/content.js"
+      ],
+      "css": [
+        "content/content.css"
       ]
     }
   ],

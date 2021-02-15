@@ -3,10 +3,34 @@ html, body {
   height: 100%;
 }
 
-body#multiflow {
+
+body[data-app="workflowy"] {
+  #workflowy {
+    display: block;
+  }
+  #multiflow {
+    display: none;
+  }
+}
+
+body[data-app="multiflow"] {
+  #workflowy {
+    display: none;
+  }
+  #multiflow {
+    display: block;
+  }
+}
+
+#workflowy {
+  height: 100%;
+}
+
+#multiflow {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  height: 100%;
 
   main {
     display: flex;

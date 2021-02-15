@@ -1,13 +1,14 @@
 import { WF_WIDTH } from '../helpers/config.js'
-import html from '../content.html'
 import Frame from './Frame.js'
 import { getTitle } from '../../utils/app.js'
+import { getDoc } from '../helpers/dom.js'
 
 /**
  * Manager class
  *
  * @property {Frame[]}      frames
  * @property {HTMLElement}  container
+ * @property {HTMLElement}  workflowy
  */
 export default class Page {
   constructor () {
@@ -17,24 +18,48 @@ export default class Page {
   }
 
   get numVisible () {
-    return this.frames.filter(frame => frame.isVisible()).length
+    return this.getVisibleFrames().length
   }
 
-  setup () {
-    // setup page
-    // need to set up icon first; doc.write seems to prevent it being set after
-    document.querySelector('[rel="shortcut icon"]').setAttribute('href', chrome.runtime.getURL('assets/icons/icon-48.png'))
-    document.write(html)
+  init () {
+    // workflowy
+    const workflowy = document.createElement('div')
+    workflowy.setAttribute('id', 'workflowy')
+    Array.from(document.body.children).forEach(child => workflowy.appendChild(child))
+    document.body.appendChild(workflowy)
 
-    // setup page
-    this.container = document.querySelector('main')
-    this.addFrame(document.location.href)
+    // multiflow
+    const multiflow = document.createElement('div')
+    multiflow.setAttribute('id', 'multiflow')
+    document.body.appendChild(multiflow)
 
-    // prevent flash of unstyled frames
-    this.container.style.display = 'none'
-    setTimeout(() => {
-      this.container.style.display = ''
-    }, 200)
+    // container
+    this.container = document.createElement('main')
+    multiflow.appendChild(this.container)
+  }
+
+  switchApp (isMultiFlow, closedFrame) {
+    // if switching to workflowy, show the open frame
+    if (!isMultiFlow) {
+      const openFrame = this.getVisibleFrames().find(frame => frame !== closedFrame)
+      document.location.href = openFrame.window.location.href
+    }
+
+    // values
+    const app = isMultiFlow
+      ? 'multiflow'
+      : 'workflowy'
+    const icon = isMultiFlow
+      ? chrome.runtime.getURL('assets/icons/icon-48.png')
+      : '/media/i/favicon.ico'
+    const title = isMultiFlow
+      ? getTitle(this.frames)
+      : document.querySelector('.page .content').innerText + ' - WorkFlowy'
+
+    // update
+    document.querySelector('[rel*="icon"]').setAttribute('href', icon)
+    document.body.setAttribute('data-app', app)
+    document.title = title
   }
 
   getFrameIndex (frame) {
@@ -44,35 +69,42 @@ export default class Page {
   addFrame (src) {
     const frame = new Frame(this, this.frames.length)
     this.frames.push(frame)
-    const element = frame.create(src)
-    this.container.appendChild(element)
+    frame.create(this.container, src)
     this.update()
     return frame
   }
 
   removeFrame (frame) {
-    if (this.numVisible > 1) {
+    if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.container.removeChild(frame.element)
       this.update()
     }
+    else {
+      this.switchApp(false, frame)
+    }
   }
 
   hideFrame (frame) {
-    if (this.numVisible > 1) {
+    if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.frames.push(frame)
       frame.hide()
       this.update()
     }
+    else {
+      this.switchApp(false, frame)
+    }
+  }
+
+  getVisibleFrames () {
+    return this.frames.filter(frame => frame.isVisible())
   }
 
   getFramesInfo () {
-    return this.frames
-      .filter(frame => frame.isVisible())
-      .map(frame => frame.getData())
+    return this.getVisibleFrames().map(frame => frame.getData())
   }
 
   load (frame, href, hasModifier) {
