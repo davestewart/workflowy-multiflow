@@ -1,58 +1,86 @@
 import './popup.scss'
-import { runCommand } from '../utils/chrome.js'
-import { Sessions } from '../utils/app.js'
+import { callContent } from '../utils/chrome.js'
+import { log, Sessions, Settings, State } from '../utils/app.js'
 
+// debug
+Object.assign(window, { Sessions, Settings })
+
+// app
 window.app = new Vue({
   el: '#app',
 
   data () {
     return {
-      state: {},
-      sessions: [],
-      settings: {
-        layout: 'fit-screen',
-        links: 'in-place',
-      },
+      // the mode and loading state of the page
+      state: State.create(),
+
+      // the layout and links of the page
+      settings: Settings.get(),
+
+      // the session data of the page
+      pageSession: { id: 0 },
+
+      // the sessions saved in local storage
+      savedSessions: Sessions.get(),
+
+      // the save action (uses data not watch because of the delay in message sending causes the UI to flicker)
+      saveAction: 'save',
     }
   },
 
   computed: {
-    noSaveText () {
-      if (!(this.state.mode === 'multiflow')) {
-        return 'Can only save MultiFlowy sessions'
-      }
-      if (this.sessions.find(session => session.id === this.state.id)) {
-        return 'You have already saved this session'
-      }
+    version () {
+      return chrome.runtime.getManifest().version
     },
 
-    canSave () {
-      return !this.noSaveText
+    // the saved session that matches the id of the page session
+    savedSession () {
+      return this.savedSessions.find(session => this.pageSession && this.pageSession.id === session.id)
+    },
+
+    isSessionSynced () {
+      return this.savedSession && this.pageSession && this.savedSession.id === this.pageSession.id
+    },
+
+    isSettingsSynced () {
+      return this.savedSession && JSON.stringify(this.savedSession.settings) === JSON.stringify(this.settings)
+    },
+
+    saveText () {
+      const text = {
+        update: 'Update session',
+        none: 'Update session',
+        save: 'Save new session...',
+      }
+      return text[this.saveAction]
     },
   },
 
-  mounted () {
-    // show
-    setTimeout(() => {
-      document.querySelector('.main').classList.remove('hidden')
-    }, 100)
-
-    // set up watch
-    Object.keys(this.settings).forEach(key => {
-      this.$watch(`settings.${key}`, value => this.setState(key, value))
-    })
-
+  async created () {
     // listen for any messages
     chrome.runtime.onMessage.addListener(this.onMessage)
 
-    // always load previous session
-    const sessions = Sessions.get()
-    if (Array.isArray(sessions)) {
-      this.sessions = sessions
-    }
+    // watch settings changes
+    Object.keys(this.settings).forEach(key => {
+      this.$watch(`settings.${key}`, value => this.setSetting(key, value))
+    })
 
-    // initialize!
-    return this.init()
+    // watch other changes
+    'settings pageSession savedSessions'.split(' ').forEach(key => {
+      this.$watch(key, () => this.setSaveAction(), {
+        immediate: true,
+        deep: true,
+      })
+    })
+
+    // get page data
+    this.update()
+  },
+
+  async mounted () {
+    setTimeout(() => {
+      document.querySelector('.main').classList.remove('hidden')
+    }, 0)
   },
 
   beforeDestroy () {
@@ -60,65 +88,95 @@ window.app = new Vue({
   },
 
   methods: {
-    async init () {
-      const state = await this.getState()
-      this.state = state || {}
-      this.settings.links = state.links
-      this.settings.layout = state.layout
-    },
+    // -----------------------------------------------------------------------------------------------------------------
+    // data
+    // -----------------------------------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------------------------------
-    // body data
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    async getState () {
-      return runCommand('getState')
-    },
-
-    setState (key, value) {
-      return runCommand('setState', { [key]: value })
-    },
-
-    // ---------------------------------------------------------------------------------------------------------------------
-    // sessions
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    async saveSession () {
-      if (this.canSave) {
-        this.state.hash = this.state.id
-        const session = await this.getState()
-        this.sessions.push(session)
-        Sessions.set(this.sessions)
-        await this.setState('id', session.id)
-        await this.init()
+    async update () {
+      const data = await callContent('getData')
+      if (data) {
+        Object.assign(this.settings, data.settings)
+        Object.assign(this.state, data.state)
+        this.pageSession = data.session
       }
     },
 
-    loadSession (index) {
-      const session = this.sessions[index]
-      return runCommand('setState', session)
-        .then(() => this.init())
+    setSetting (key, value) {
+      return callContent('setSetting', { key, value })
     },
 
-    async removeSession (index) {
-      this.sessions.splice(index, 1)
-      Sessions.set(this.sessions)
+    setSaveAction () {
+      this.saveAction = this.isSessionSynced
+        ? this.isSettingsSynced
+          ? 'none'
+          : 'update'
+        : 'save'
     },
 
-    // ---------------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+    // sessions
+    // -----------------------------------------------------------------------------------------------------------------
+
+    async saveSession () {
+      // variables
+      const session = {
+        ...this.pageSession,
+        settings: {
+          ...this.settings,
+        },
+      }
+
+      // save
+      if (this.saveAction === 'save') {
+        this.savedSessions.push(session)
+      }
+
+      // update
+      else {
+        Object.assign(this.savedSession.settings, this.settings)
+      }
+
+      // save
+      Sessions.set(this.savedSessions)
+    },
+
+    async loadSession (index) {
+      const session = this.savedSessions[index]
+      if (session.id !== this.pageSession.id) {
+        await callContent('setSession', session)
+      }
+    },
+
+    removeSession (index) {
+      this.savedSessions.splice(index, 1)
+      Sessions.set(this.savedSessions)
+      this.update()
+    },
+
+    // -----------------------------------------------------------------------------------------------------------------
     // utilities
-    // ---------------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     reload () {
       window.location.reload()
     },
 
     onMessage (message) {
-      if (message.command === 'frameloaded') {
-        return this.init()
+      const { command, value } = message
+      switch (command) {
+        case 'setLoading':
+          this.state.loading = value
+          if (value === false) {
+            this.update()
+          }
+          break
+
+        case 'setSession':
+          this.pageSession = value
+          break
       }
     },
   },
 })
 
-console.log('MultiFlow: background loaded')
+log('popup loaded')

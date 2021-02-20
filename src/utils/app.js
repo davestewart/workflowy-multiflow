@@ -1,15 +1,12 @@
 import { storage } from './storage.js'
 
-export function getTitle (frames) {
-  if (Array.isArray(frames)) {
-    return frames.map(frame => {
-      const title = frame.title
-      return title === 'WorkFlowy - Organize your brain.'
-        ? 'Home'
-        : title
-    }).join(' + ')
-  }
-  return ''
+export const State = {
+  create () {
+    return {
+      mode: 'workflowy',
+      loading: false,
+    }
+  },
 }
 
 export const Settings = {
@@ -27,10 +24,14 @@ export const Settings = {
 
 export const Sessions = {
   get () {
-    return storage.get('sessions')
+    return storage.get('sessions', [])
   },
 
   set (value) {
     storage.set('sessions', value)
   },
+}
+
+export function log (message, ...values) {
+  console.log('MultiFlow: ' + message, ...values)
 }

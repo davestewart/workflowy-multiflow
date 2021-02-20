@@ -21,7 +21,7 @@
     <form class="form-horizontal form-horizontal">
 
       <!-- layout -->
-      <div class="form-group ">
+      <div class="form-group">
         <div class="col-3">
           <label class="form-label">Layout</label>
         </div>
@@ -68,30 +68,39 @@
           <label class="form-label">Sessions</label>
         </div>
         <div class="col-9">
-          <div v-if="sessions.length" class="sessions">
-            <label v-for="(session, index) in sessions" class="form-radio">
-              <input v-model="state.hash" :value="session.id" type="radio" name="session">
+          <!-- sessions -->
+          <div v-if="savedSessions.length" class="sessions">
+            <label v-for="(session, index) in savedSessions" class="form-radio">
+              <input v-model="pageSession.id" :value="session.id" type="radio" name="session">
               <i class="form-icon"></i>
               <div class="session__text">
-                <span class="session__title" @click="loadSession(index)">{{ session.title }}</span>
+                <span class="session__title" @click="loadSession(index)">{{ session.title }}&nbsp;</span>
                 <span class="session__delete" @click.stop="removeSession(index)">&times;</span>
               </div>
             </label>
           </div>
-          <label class="form-label">
-            <a href="#"
-               class="sessions__save"
-               :disabled="!canSave"
-               :title="canSave ? `Save &quot;${state.title}&quot;` : noSaveText"
-               @click.prevent="saveSession"
-            >Save Session</a>
+
+          <!-- save button -->
+          <label class="sessionAction form-label">
+            <div v-if="state.loading">
+              <span class="sessionAction__status">
+                Loading...
+              </span>
+            </div>
+            <button v-else
+                    class="sessionAction__button btn btn-link btn-sm"
+                    :disabled="saveAction === 'none'"
+                    @click.prevent="saveSession"
+            >{{ saveText }}
+            </button>
           </label>
         </div>
       </div>
 
       <div class="form-group mt-2">
-        <div class="col-12 home-link">
-          <a href="https://davestewart.co.uk/products/workflowy-multiflow" target="_blank">Help...</a>
+        <div class="col-12 links">
+          <a href="https://chrome.google.com/webstore/detail/workflowy-multiflow/khjdmjcmpolknpccmaaipmidphjokhdf" target="_blank">MultiFlow {{version }}</a>
+          <a href="https://davestewart.co.uk/products/workflowy-multiflow" target="_blank">Help</a>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { isModifier, stop } from '../../utils/dom.js'
 import { WF_URL } from './config.js'
 
-export function checkLoaded (doc = document) {
+export function checkReady (doc = document) {
   return function () {
     const app = doc.getElementById('app')
     return app && app.innerHTML !== ''
@@ -52,4 +52,17 @@ export function addListeners (window, handler) {
       }
     }
   }, { capture: true })
+}
+
+export function setSetting (key, value) {
+  document.body.setAttribute('data-' + key, value)
+}
+
+export function getSetting (key) {
+  const value = document.body.getAttribute('data-' + key)
+  return /^\d+$/.value
+    ? parseInt(value)
+    : /^(true|false)$/.test(value)
+      ? value === 'true'
+      : value
 }

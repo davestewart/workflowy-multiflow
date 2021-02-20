@@ -1,6 +1,9 @@
-import { getTitle } from '../../utils/app.js'
+import { log } from '../../utils/app.js'
+import { callBackground } from '../../utils/chrome.js'
+import { getSetting, setSetting } from '../helpers/dom.js'
 import { WF_WIDTH } from '../helpers/config.js'
 import Frame from './Frame.js'
+import { getId, getTitle } from '../helpers/app.js'
 
 /**
  * Manager class
@@ -20,6 +23,10 @@ export default class Page {
     return this.getVisibleFrames().length
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // setup
+  // -------------------------------------------------------------------------------------------------------------------
+
   init () {
     // workflowy
     const workflowy = document.createElement('div')
@@ -35,6 +42,35 @@ export default class Page {
     // container
     this.container = document.createElement('main')
     multiflow.appendChild(this.container)
+
+    // add fake frames
+    // const url = chrome.runtime.getURL('content/content.html')
+    /*
+    const sources = ['', '', '', '']
+    sources.forEach(src => {
+      this.addFrame(src)
+    })
+    */
+  }
+
+  load (urls = []) {
+    // update frames
+    const max = Math.max(urls.length, this.numVisible)
+    for (let i = 0; i < max; i++) {
+      const frame = this.frames[i]
+      const url = urls[i]
+      if (url) {
+        frame
+          ? frame.load(url)
+          : this.addFrame(url)
+      }
+      else {
+        this.hideFrame(frame)
+      }
+    }
+
+    // switch mode
+    this.switchMode(urls.length > 1)
   }
 
   switchMode (isMultiFlow, closedFrame) {
@@ -57,63 +93,32 @@ export default class Page {
 
     // update
     document.querySelector('[rel*="icon"]').setAttribute('href', icon)
-    document.body.setAttribute('data-mode', mode)
-    document.title = title
+    setSetting('mode', mode)
+    this.setTitle(title)
   }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // frames
+  // -------------------------------------------------------------------------------------------------------------------
 
   getFrameIndex (frame) {
     return this.frames.indexOf(frame)
-  }
-
-  addFrame (src) {
-    const frame = new Frame(this, this.frames.length)
-    this.frames.push(frame)
-    frame.create(this.container, src)
-    this.update()
-    return frame
-  }
-
-  removeFrame (frame) {
-    if (this.numVisible > 2) {
-      const index = this.getFrameIndex(frame)
-      this.frames.splice(index, 1)
-      this.container.removeChild(frame.element)
-      this.update()
-    }
-    else {
-      this.switchMode(false, frame)
-    }
-  }
-
-  hideFrame (frame) {
-    if (this.numVisible > 2) {
-      const index = this.getFrameIndex(frame)
-      this.frames.splice(index, 1)
-      this.frames.push(frame)
-      frame.hide()
-      this.update()
-    }
-    else {
-      this.switchMode(false, frame)
-    }
   }
 
   getVisibleFrames () {
     return this.frames.filter(frame => frame.isVisible())
   }
 
-  getInfo () {
-    const frames = this.getVisibleFrames().map(frame => frame.getData())
-    const title = getTitle(frames)
-    const id = title.toLowerCase().replace(/\W+/g, '-')
-    return {
-      urls: frames.map(frame => frame.url),
-      title,
-      id,
-    }
+  addFrame (src) {
+    this.setLoading(true)
+    const frame = new Frame(this, this.frames.length)
+    this.frames.push(frame)
+    frame.create(this.container, src)
+    this.updateLayout()
+    return frame
   }
 
-  load (frame, href, hasModifier) {
+  loadFrame (frame, href, hasModifier) {
     const hasNext = this.getFrameIndex(frame) < this.numVisible - 1
     const loadSame = !!document.querySelector('[data-links="in-place"]')
     const loadNext = loadSame
@@ -131,44 +136,109 @@ export default class Page {
       nextFrame
         ? nextFrame.load(href)
         : this.addFrame(href)
-      this.update()
+      this.updateLayout()
     }
   }
 
-  update () {
+  hideFrame (frame) {
+    if (this.numVisible > 2) {
+      const index = this.getFrameIndex(frame)
+      this.frames.splice(index, 1)
+      this.frames.push(frame)
+      frame.hide()
+      this.updateLayout()
+    }
+    else {
+      this.switchMode(false, frame)
+    }
+  }
+
+  removeFrame (frame) {
+    if (this.numVisible > 2) {
+      const index = this.getFrameIndex(frame)
+      this.frames.splice(index, 1)
+      this.container.removeChild(frame.element)
+      this.updateLayout()
+    }
+    else {
+      this.switchMode(false, frame)
+    }
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // state updates
+  // -------------------------------------------------------------------------------------------------------------------
+
+  updateLayout () {
     // order
     this.frames.forEach((frame, index) => frame.setOrder(index + 1))
 
     // count
-    document.body.setAttribute('data-frames', String(this.numVisible))
+    setSetting('frames', this.numVisible)
 
-    // title
-    this.updateTitle()
+    // info
+    this.updateSession()
 
     // layout
     if (this.container) {
-      const layout = document.body.getAttribute('data-layout')
+      const layout = getSetting('layout')
       this.container.style.width = layout === 'fit-content'
         ? (WF_WIDTH * this.numVisible) + 'px'
         : 'auto'
     }
   }
 
-  updateTitle () {
-    document.title = this.getInfo().title
+  updateSession () {
+    const session = this.getSession()
+    this.setTitle(session.title)
   }
 
-  updateHash () {
-    window.location.replace('#/' + this.getInfo().id)
+  getSession () {
+    const frames = this.getVisibleFrames().map(frame => frame.getData())
+    const title = getTitle(frames)
+    const urls = frames
+      .map(frame => frame.url)
+    const hash = frames
+      .map(frame => frame.hash)
+      .join('/')
+    const id = frames
+      .map(frame => getId(frame))
+      .join('+')
+    return {
+      urls,
+      title,
+      hash,
+      id,
+    }
   }
 
-  onFrameLoaded (frame) {
-    this.updateTitle()
-    this.updateHash()
-    chrome.runtime.sendMessage({ command: 'frameloaded', value: frame.index })
+  setLoading (state) {
+    setSetting('loading', state)
+    callBackground('setLoading', state)
+  }
+
+  setTitle (title) {
+    if (title) {
+      document.title = title
+    }
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // handlers
+  // -------------------------------------------------------------------------------------------------------------------
+
+  onFrameReady () {
+    const frames = this.getVisibleFrames()
+    const numLoaded = frames.filter(frame => !!frame.loaded).length
+    const pcLoaded = Math.floor((numLoaded / frames.length) * 100)
+    log(`loaded ${pcLoaded} %`)
+    if (numLoaded === frames.length) {
+      this.setLoading(false)
+      this.updateSession()
+    }
   }
 
   onFrameNavigated () {
-    this.updateTitle()
+    this.updateSession()
   }
 }

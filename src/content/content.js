@@ -12,16 +12,20 @@ if (window === window.top) {
 
   // commands
   chrome.runtime.onMessage.addListener(function (request = {}, _sender, callback) {
-    switch (request.command) {
-      case 'getState':
-        return callback(app.getState())
+    const { command, value } = request
+    switch (command) {
+      case 'setSession':
+        return callback(app.setSession(value))
 
-      case 'setState':
-        return callback(app.setState(request.value))
+      case 'setSetting':
+        return callback(app.setSetting(value.key, value.value))
+
+      case 'getData':
+        return callback(app.getData())
 
       default:
         // eslint-disable-next-line node/no-callback-literal
-        return callback('Unknown request')
+        return callback('Unknown command')
     }
   })
 }

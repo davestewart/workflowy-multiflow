@@ -38,6 +38,10 @@ body {
   &[data-frames="1"] iframe {
     max-width: unset !important;
   }
+
+  &[data-message] .message {
+
+  }
 }
 
 #workflowy {

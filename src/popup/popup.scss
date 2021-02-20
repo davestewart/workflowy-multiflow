@@ -56,7 +56,8 @@ body {
 .main {
   position: relative;
   opacity: 1;
-  transition: .5s opacity;
+  transition: .4s opacity;
+  transition-delay: .1s;
 
   &.hidden {
     opacity: 0;
@@ -111,6 +112,10 @@ form {
   color: $blue;
 }
 
+.btn {
+  font-size: 13px;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // elements
 // ---------------------------------------------------------------------------------------------------------------------
@@ -119,18 +124,6 @@ form {
   padding-bottom: .7rem;
   border-bottom: 1px solid $grey-lighter;
   margin-bottom: 1em;
-
-  &__save {
-    display: inline-block;
-    margin-top: -.1rem;
-    margin-left: 1.2rem;
-    padding: .1rem .4rem;
-    outline: none !important;
-    box-shadow: none !important;
-    &[disabled] {
-      cursor: default;
-    }
-  }
 }
 
 .session {
@@ -162,7 +155,52 @@ form {
   }
 }
 
-.home-link {
+.sessionAction {
+  margin-top: -.1rem;
+  margin-left: 1.35rem;
+
+  > * {
+    display: inline-block;
+    padding: .1rem .4rem;
+  }
+
+  &__status {
+    color: $grey-light;
+  }
+
+  &__button {
+    outline: none !important;
+    box-shadow: none !important;
+    &:not([disabled]):hover {
+      text-decoration: underline;
+    }
+    &[disabled] {
+      cursor: default;
+    }
+  }
+
+}
+
+.links {
+  position: relative;
+  right: -.25rem;
+  bottom: -.25rem;
   text-align: right;
-  font-size: .7em;
+  font-size: 0;
+
+  a {
+    display: inline-block;
+    padding: .2em .6em;
+    font-size: 10px;
+    color: $grey-light;
+    text-decoration: none;
+
+    &:not(:first-child) {
+      border-left: 1px solid $grey-lighter;
+    }
+  }
+
+  a:hover {
+    color: $blue;
+  }
 }

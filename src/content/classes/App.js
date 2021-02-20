@@ -1,7 +1,8 @@
-import { addListeners, checkLoaded } from '../helpers/dom.js'
-import { WF_URL } from '../helpers/config.js'
-import { Settings } from '../../utils/app.js'
+import { log, Settings } from '../../utils/app.js'
+import { callBackground } from '../../utils/chrome.js'
 import { runWhen } from '../../utils/dom.js'
+import { addListeners, checkReady, getSetting, setSetting } from '../helpers/dom.js'
+import { WF_URL } from '../helpers/config.js'
 import Page from './Page.js'
 
 /**
@@ -15,34 +16,54 @@ export default class App {
    * Application class
    */
   constructor () {
-    // debug
-    console.log('MultiFlow: running...')
-
-    // page container
-    this.page = new Page()
-
-    // update with stored settings
-    const settings = Settings.get()
-    this.setState(settings)
-
-    // init when loaded
-    runWhen(checkLoaded(document), () => this.init())
+    log('running!')
+    this.init()
   }
 
-  init () {
-    // debug
-    console.log('MultiFlow: initializing...')
+  // -------------------------------------------------------------------------------------------------------------------
+  // setup
+  // -------------------------------------------------------------------------------------------------------------------
 
-    // initialize page structure
+  init () {
+    // page
+    log('updating page structure')
+    this.page = new Page()
     this.page.init()
 
-    // monitor clicks
+    // settings
+    log('loading settings')
+    setSetting('mode', 'workflowy')
+
+    // session settings
+    const settings = Settings.get()
+    this.setSettings(settings)
+
+    // session
+    log('checking for session...')
+    const id = location.hash.substring(2)
+    chrome.runtime.sendMessage({ command: 'page_loaded', value: id }, (session) => {
+      if (chrome.runtime.lastError) {
+        console.warn('MultiFlow:', chrome.runtime.lastError.message)
+      }
+      if (session) {
+        this.setSession(session)
+      }
+    })
+
+    // wait for ready...
+    log('waiting for load...')
+    return runWhen(checkReady(document), () => this.onReady())
+  }
+
+  onReady () {
+    log('page ready!')
     addListeners(window, this.onItemClick.bind(this))
   }
 
+  // handle clicks on main workflowy page
   onItemClick (_frame, url, hasModifier) {
     if (hasModifier) {
-    // determine current item
+      // determine current item
       const projectId = document.querySelector('[projectid]').getAttribute('projectid')
       const itemId = projectId !== 'None'
         ? projectId.split('-').pop()
@@ -50,7 +71,10 @@ export default class App {
 
       // load urls
       const urls = [WF_URL + '/#' + itemId, url]
-      this.load({ urls })
+      this.setSession({
+        id: 'multiflow',
+        urls,
+      })
     }
 
     // navigate as usual
@@ -59,73 +83,58 @@ export default class App {
     }
   }
 
-  load (settings) {
-    console.log('Multiflow: loading urls...')
-    this.page.switchMode(true)
-    this.setState({
-      ...settings,
-      id: 'multiflow',
-    })
+  // -------------------------------------------------------------------------------------------------------------------
+  // data
+  // -------------------------------------------------------------------------------------------------------------------
+
+  setSettings (settings = {}) {
+    Object.keys(settings).forEach(key => this.setSetting(key, settings[key]))
   }
 
-  setState (data = {}) {
+  setSetting (key, value) {
+    setSetting(key, value)
+    if (key === 'layout') {
+      this.page.updateLayout()
+    }
+  }
+
+  getSetting (key) {
+    return getSetting(key)
+  }
+
+  setSession (data = {}) {
+    // debug
+    log('session ' + Object.keys(data).join(', '))
+
     // data
-    const { id, layout, links, title, urls } = data
+    const { settings, urls } = data
 
-    // id
-    if (id) {
-      // FIXME although the hash gets set, it resets to '/' a few 100ms after it has updated
-      // it seems to be related to content loading in, and I can't seem to fix it
-      // so I now force an update of the hash when frames load
-      location.href = '#/' + id
-    }
-
-    // title
-    if (title) {
-      document.title = title
-    }
-
-    // layout
-    if (layout) {
-      document.body.setAttribute('data-layout', layout)
-      if (this.page.numVisible) {
-        this.page.update()
-      }
-    }
-
-    // layout
-    if (links) {
-      document.body.setAttribute('data-links', links)
+    // settings
+    if (settings) {
+      this.setSettings(settings)
     }
 
     // urls
     if (urls) {
-      this.page.switchMode(true)
       if (Array.isArray(urls) && urls.length > 0) {
-        const max = Math.max(urls.length, this.page.numVisible)
-        for (let i = 0; i < max; i++) {
-          const frame = this.page.frames[i]
-          const url = urls[i]
-          if (url) {
-            frame
-              ? frame.load(url)
-              : this.page.addFrame(url)
-          }
-          else {
-            this.page.hideFrame(frame)
-          }
-        }
+        setTimeout(() => {
+          this.page.load(urls)
+        }, 100)
       }
     }
   }
 
-  getState () {
+  getData () {
     return {
-      hash: window.location.hash.substr(2),
-      mode: document.querySelector('body').getAttribute('data-mode'),
-      links: document.body.getAttribute('data-links'),
-      layout: document.body.getAttribute('data-layout'),
-      ...this.page.getInfo(),
+      session: this.page.getSession(),
+      settings: {
+        layout: this.getSetting('layout'),
+        links: this.getSetting('links'),
+      },
+      state: {
+        loading: this.getSetting('loading'),
+        mode: this.getSetting('mode'),
+      },
     }
   }
 }

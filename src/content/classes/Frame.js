@@ -1,6 +1,8 @@
+import { log } from '../../utils/app.js'
 import { isModifier, runWhen } from '../../utils/dom.js'
-import { checkLoaded, getDoc, addListeners } from '../helpers/dom.js'
+import { checkReady, getDoc, addListeners } from '../helpers/dom.js'
 import { WF_URL } from '../helpers/config.js'
+// import { WF_URL } from '../helpers/config.js'
 
 /**
  * Frame class
@@ -20,37 +22,56 @@ export default class Frame {
     this.parent = parent
     this.index = index
     this.element = null
+    this.loaded = false
   }
 
   get window () {
     return this.element.contentWindow
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // setup
+  // -------------------------------------------------------------------------------------------------------------------
+
   create (container, src) {
+    // blank frames
+    const isHidden = !src
+    src = src || 'about:blank'
+
     // create iframe
     this.element = document.createElement('iframe')
-    this.element.setAttribute('src', src || WF_URL + '#/loading')
+    this.element.setAttribute('src', src)
     container.appendChild(this.element)
 
-    // add load handler
+    // don't show hidden frames
+    if (isHidden) {
+      this.hide()
+    }
+
+    // set up load
+    this.loaded = false
     this.element.addEventListener('load', () => {
-      const document = getDoc(this.window)
-      return runWhen(checkLoaded(document), () => this.init())
+      if (this.window.location.href.startsWith(WF_URL)) {
+        log('loaded frame:', src)
+        const document = getDoc(this.window)
+        return runWhen(checkReady(document), () => this.onReady())
+      }
     })
 
     // return
     return this.element
   }
 
-  init () {
+  onReady () {
+    // loading progress
+    this.loaded = true
+    this.parent.onFrameReady(this)
+
     // variables
     const parent = this.parent
     const element = this.element
     const document = getDoc(element)
     const page = document.querySelector('.page')
-
-    // let popup know, in case it is open
-    parent.onFrameLoaded(this)
 
     // monitor navigation changes
     const observer = new MutationObserver(() => parent.onFrameNavigated())
@@ -74,11 +95,9 @@ export default class Frame {
     }
   }
 
-  onClick (type, href, hasModifier) {
-    type === 'link'
-      ? this.parent.load(this, href, hasModifier)
-      : this.parent.loadNextFrame(this, href)
-  }
+  // ---------------------------------------------------------------------------------------------------------------------
+  // actions
+  // ---------------------------------------------------------------------------------------------------------------------
 
   load (href) {
     this.window.location.href = href
@@ -93,6 +112,10 @@ export default class Frame {
     this.element.classList.add('hidden')
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // accessors
+  // -------------------------------------------------------------------------------------------------------------------
+
   isVisible () {
     return !this.element.classList.contains('hidden')
   }
@@ -106,11 +129,21 @@ export default class Frame {
     if (this.window) {
       const doc = getDoc(this.window)
       return {
-        title: doc.title.replace(' - WorkFlowy', '') || '[ loading ]',
+        title: doc.title.replace(' - WorkFlowy', '') || ' LOADING ',
+        hash: this.window.location.hash.substr(2),
         url: this.window.location.href,
-        mode: doc.querySelector('.project.board') ? 'board' : 'list',
       }
     }
     return {}
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // handlers
+  // -------------------------------------------------------------------------------------------------------------------
+
+  onClick (type, href, hasModifier) {
+    type === 'link'
+      ? this.parent.loadFrame(this, href, hasModifier)
+      : this.parent.loadNextFrame(this, href)
   }
 }
