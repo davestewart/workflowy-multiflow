@@ -1,9 +1,11 @@
 import './popup.scss'
 import { callContent } from '../utils/chrome.js'
 import { log, Sessions, Settings, State } from '../utils/app.js'
+import { SlickList, SlickItem } from './helpers/sorting.js'
 
-// debug
-Object.assign(window, { Sessions, Settings })
+// sorting
+Vue.component('slick-list', SlickList)
+Vue.component('slick-item', SlickItem)
 
 // app
 window.app = new Vue({
@@ -30,7 +32,9 @@ window.app = new Vue({
 
   computed: {
     version () {
-      return chrome.runtime.getManifest().version
+      return chrome.runtime.getManifest
+        ? chrome.runtime.getManifest().version
+        : ''
     },
 
     // the saved session that matches the id of the page session
@@ -159,6 +163,18 @@ window.app = new Vue({
 
     reload () {
       window.location.reload()
+    },
+
+    onSortStart () {
+      this.state.sorting = true
+    },
+
+    onSortEnd () {
+      this.state.sorting = false
+    },
+
+    onSortInput () {
+      Sessions.set(this.savedSessions)
     },
 
     onMessage (message) {

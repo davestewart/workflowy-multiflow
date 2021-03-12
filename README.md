@@ -7,8 +7,9 @@
 
 ## Intro
 
-WorkFlowy MultiFlow adds a multi-column view to WorkFlowy, which enables you to maintain an overview over several trees at once, or refactor longer lists by copying and pasting between two columns, instead of scrolling up and down in a single window.
+WorkFlowy MultiFlow adds a multi-column view to WorkFlowy, which enables you to maintain an overview of or relationship between several trees at once.
 
+It can also make moving data within large trees easier, as you can open a new column and cut and paste between columns, rather than scrolling up and down or collapsing and uncollapsing bullets.
 Columns are opened by Cmd/Ctrl+Clicking on:
 
 - bullets
@@ -19,7 +20,7 @@ You can open and close as many columns as you require, and change the layout by 
 
 When you first click the icon your previous session will be loaded so you can start where you left off.
 
-Click here for a [video](https://www.youtube.com/watch?v=Iy1DuGjUhR4).
+See the [home page](https://davestewart.co.uk/products/workflowy-multiflow) for more information.
 
 
 ## Development
@@ -46,6 +47,7 @@ The file `assets/multiflow.sketch` is a [Sketch](https://www.sketch.com/) file c
 
 ## Links
 
+- [MultiFlow home page](https://davestewart.co.uk/products/workflowy-multiflow)
 - [Chrome Web Store](https://chrome.google.com/webstore/detail/workflowy-multiflow/khjdmjcmpolknpccmaaipmidphjokhdf)
 - [Product Hunt](https://www.producthunt.com/posts/workflowy-multiflow)
 - [Reddit](https://www.reddit.com/r/Workflowy/comments/l9eoqz/workflowy_multiflow_navigate_organise_maintain/)

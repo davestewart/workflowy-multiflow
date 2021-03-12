@@ -1,5 +1,4 @@
 import { log, Settings } from '../../utils/app.js'
-import { callBackground } from '../../utils/chrome.js'
 import { runWhen } from '../../utils/dom.js'
 import { addListeners, checkReady, getSetting, setSetting } from '../helpers/dom.js'
 import { makeWfUrl } from '../helpers/config.js'
@@ -104,7 +103,7 @@ export default class App {
 
   setSession (data = {}) {
     // debug
-    log('session ' + Object.keys(data).join(', '))
+    // log('session ' + Object.keys(data).join(', '))
 
     // data
     const { settings, urls } = data

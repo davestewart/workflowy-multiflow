@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="popup.css">
   <script src="../assets/vendor/mac-fix.js"></script>
   <script src="../assets/vendor/vue.js"></script>
+  <script src="../assets/vendor/vue-slicksort.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -62,22 +63,33 @@
 
       <hr>
 
-      <!-- layout -->
+      <!-- sessions -->
       <div class="form-group ">
         <div class="col-3">
           <label class="form-label">Sessions</label>
         </div>
         <div class="col-9">
           <!-- sessions -->
-          <div v-if="savedSessions.length" class="sessions">
-            <label v-for="(session, index) in savedSessions" class="form-radio">
-              <input v-model="pageSession.id" :value="session.id" type="radio" name="session">
-              <i class="form-icon"></i>
-              <div class="session__text">
-                <span class="session__title" @click="loadSession(index)">{{ session.title }}&nbsp;</span>
-                <span class="session__delete" @click.stop="removeSession(index)">&times;</span>
-              </div>
-            </label>
+          <div v-if="savedSessions.length" class="sessions" :data-sorting="state.sorting">
+            <slick-list lock-axis="y"
+                        :distance="1"
+                        v-model="savedSessions"
+                        :lock-to-container-edges="true"
+                        @sort-start="onSortStart"
+                        @sort-end="onSortEnd"
+                        @input="onSortInput"
+            >
+              <slick-item v-for="(session, index) in savedSessions" :index="index" :key="index">
+                <label class="form-radio" @click="loadSession(index)">
+                  <input v-model="pageSession.id" :value="session.id" type="radio" name="session">
+                  <i class="form-icon"></i>
+                  <div class="session__text">
+                    <span class="session__title">{{ session.title }}&nbsp;</span>
+                    <span class="session__delete" @click.prevent.stop="removeSession(index)">&times;</span>
+                  </div>
+                </label>
+              </slick-item>
+            </slick-list>
           </div>
 
           <!-- save button -->

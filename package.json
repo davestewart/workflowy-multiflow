@@ -12,9 +12,11 @@
   "author": "Dave Stewart",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-buble": "^0.21.3",
     "@rollup/plugin-multi-entry": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-replace": "^2.3.4",
     "bestzip": "^2.1.7",
-    "debounce": "^1.2.0",
     "eslint": "^7.19.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
@@ -25,11 +27,14 @@
     "rollup": "^2.38.5",
     "rollup-plugin-copy-watch": "0.0.1",
     "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-node-externals": "^2.2.0",
     "rollup-plugin-scss": "^2.6.1",
     "rollup-plugin-string": "^3.0.0",
     "yargs": "^16.2.0"
   },
   "dependencies": {
-    "vue": "^2.6.12"
+    "debounce": "^1.2.0",
+    "vue": "^2.6.12",
+    "vue-slicksort": "^1.2.0"
   }
 }

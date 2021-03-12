@@ -104,8 +104,19 @@ form {
   color: $black;
 }
 
+.form-group .col-9 {
+  padding-top: .2rem;
+}
+
 .form-radio {
-  margin-left: .5rem;
+  margin: 0 0 0 .5rem;
+  padding: .1rem 0 .3rem 1.2rem;
+  cursor: pointer;
+}
+
+.form-select {
+  margin-top: 0.2rem;
+  border: 1px solid $grey-lighter;
 }
 
 .form-radio:hover {
@@ -155,8 +166,14 @@ form {
   }
 }
 
+.sessions[data-sorting] {
+  .session__delete {
+    display: none !important;
+  }
+}
+
 .sessionAction {
-  margin-top: -.1rem;
+  margin-top: -.3rem;
   margin-left: 1.35rem;
 
   > * {

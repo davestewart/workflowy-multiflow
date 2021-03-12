@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v1.5.0] - 2021-03-12
+
+Added:
+
+- added sessions sorting
+
+
+## [v1.4.2] - 2021-03-12
+
+Fixed:
+
+- fixed bug where sidebar would leave padding when switching to multiflow mode
+
+
+## [v1.4.1] - 2021-03-12
+
+Fixed:
+
+- fixed bug where multiflow didn't work on workflowy subdomains 
+
+
 ## [v1.4.0] - 2021-02-15
 
 Added:
@@ -77,8 +98,10 @@ Initial release:
 - caches frames as they load
 
 
-[Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.0...HEAD
-[v1.4.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.0...v1.4.0
+[Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.0...HEAD
+[v1.5.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.2...v1.5.2
+[v1.4.2]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.1...v1.4.2
+[v1.4.1]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.1.0...v1.2.0
