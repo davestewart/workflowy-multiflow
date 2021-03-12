@@ -5,6 +5,7 @@ export const State = {
     return {
       mode: 'workflowy',
       loading: false,
+      sorting: false,
     }
   },
 }
