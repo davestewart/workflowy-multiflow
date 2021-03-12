@@ -119,12 +119,7 @@ export default class Page {
   }
 
   loadFrame (frame, href, hasModifier) {
-    const hasNext = this.getFrameIndex(frame) < this.numVisible - 1
-    const loadSame = !!document.querySelector('[data-links="in-place"]')
-    const loadNext = loadSame
-      ? hasModifier
-      : (hasNext && !hasModifier) || (!hasNext && hasModifier)
-    loadNext
+    hasModifier
       ? this.loadNextFrame(frame, href)
       : frame.load(href)
   }

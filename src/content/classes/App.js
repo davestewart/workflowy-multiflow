@@ -128,7 +128,6 @@ export default class App {
       session: this.page.getSession(),
       settings: {
         layout: this.getSetting('layout'),
-        links: this.getSetting('links'),
       },
       state: {
         loading: this.getSetting('loading'),

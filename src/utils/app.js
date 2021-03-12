@@ -13,7 +13,6 @@ export const State = {
 export const Settings = {
   get () {
     return storage.get('settings', {
-      links: 'in-place',
       layout: 'fit-screen',
     })
   },

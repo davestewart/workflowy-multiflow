@@ -16,7 +16,7 @@ window.app = new Vue({
       // the mode and loading state of the page
       state: State.create(),
 
-      // the layout and links of the page
+      // the layout of the page
       settings: Settings.get(),
 
       // the session data of the page
