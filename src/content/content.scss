@@ -14,6 +14,9 @@ body {
   }
 
   &[data-mode="multiflow"] {
+    padding: 0;
+    transition: none;
+
     #workflowy {
       display: none;
     }
