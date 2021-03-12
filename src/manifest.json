@@ -12,7 +12,7 @@
   },
   "permissions": [
     "https://workflowy.com/*",
-    "https://beta.workflowy.com/*",
+    "https://*.workflowy.com/*",
     "declarativeNetRequest",
     "declarativeContent",
     "activeTab"
@@ -32,7 +32,7 @@
   },
   "web_accessible_resources": [
     "https://workflowy.com/*",
-    "https://beta.workflowy.com",
+    "https://*.workflowy.com/*",
     "assets/icons/*",
     "content/content.html",
     "content/content.css"
@@ -41,7 +41,7 @@
     {
       "matches": [
         "https://workflowy.com/*",
-        "https://beta.workflowy.com/*"
+        "https://*.workflowy.com/*"
       ],
       "all_frames": false,
       "run_at": "document_idle",
