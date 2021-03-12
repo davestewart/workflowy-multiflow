@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v1.5.1] - 2021-03-12
+
+Removed:
+
+- removed option to choose where to open links, because it was more confusing than beneficial
+
+
 ## [v1.5.0] - 2021-03-12
 
 Added:
@@ -98,8 +105,9 @@ Initial release:
 - caches frames as they load
 
 
-[Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.0...HEAD
-[v1.5.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.2...v1.5.2
+[Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.1...HEAD
+[v1.5.1]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.0...v1.5.1
+[v1.5.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.2...v1.5.0
 [v1.4.2]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.1...v1.4.2
 [v1.4.1]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.3.0...v1.4.0
