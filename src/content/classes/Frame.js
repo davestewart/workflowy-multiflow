@@ -1,8 +1,7 @@
 import { log } from '../../utils/app.js'
 import { isModifier, runWhen } from '../../utils/dom.js'
 import { checkReady, getDoc, addListeners } from '../helpers/dom.js'
-import { WF_URL } from '../helpers/config.js'
-// import { WF_URL } from '../helpers/config.js'
+import { isWfUrl } from '../helpers/config.js'
 
 /**
  * Frame class
@@ -51,7 +50,7 @@ export default class Frame {
     // set up load
     this.loaded = false
     this.element.addEventListener('load', () => {
-      if (this.window.location.href.startsWith(WF_URL)) {
+      if (isWfUrl(this.window.location.href)) {
         log('loaded frame:', src)
         const document = getDoc(this.window)
         return runWhen(checkReady(document), () => this.onReady())

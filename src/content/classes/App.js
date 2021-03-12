@@ -2,7 +2,7 @@ import { log, Settings } from '../../utils/app.js'
 import { callBackground } from '../../utils/chrome.js'
 import { runWhen } from '../../utils/dom.js'
 import { addListeners, checkReady, getSetting, setSetting } from '../helpers/dom.js'
-import { WF_URL } from '../helpers/config.js'
+import { makeWfUrl } from '../helpers/config.js'
 import Page from './Page.js'
 
 /**
@@ -70,7 +70,7 @@ export default class App {
         : ''
 
       // load urls
-      const urls = [WF_URL + '/#' + itemId, url]
+      const urls = [makeWfUrl('#' + itemId), url]
       this.setSession({
         id: 'multiflow',
         urls,

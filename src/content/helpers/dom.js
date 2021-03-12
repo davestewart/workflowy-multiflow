@@ -1,5 +1,5 @@
 import { isModifier, stop } from '../../utils/dom.js'
-import { WF_URL } from './config.js'
+import { isWfUrl, makeWfUrl } from './config.js'
 
 export function checkReady (doc = document) {
   return function () {
@@ -36,7 +36,7 @@ export function addListeners (window, handler) {
       ? target
       : target.closest(selector)
     if (link && isModifier(event)) {
-      handler('bullet', WF_URL + link.getAttribute('href'), true)
+      handler('bullet', makeWfUrl(link.getAttribute('href')), true)
       stop(event)
     }
   }, { capture: true })
@@ -46,8 +46,8 @@ export function addListeners (window, handler) {
     const el = event.target
     if (el.tagName === 'A') {
       const href = el.getAttribute('href')
-      if (href.startsWith(WF_URL)) {
-        handler('link', href, isModifier(event))
+      if (isWfUrl(href)) {
+        handler('link', makeWfUrl(href), isModifier(event))
         stop(event)
       }
     }

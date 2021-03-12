@@ -1,7 +1,7 @@
 {
   "name": "WorkFlowy MultiFlow",
   "description" : "Navigate, organise & maintain context between separate WorkFlowy trees",
-  "version": "1.4",
+  "version": "1.4.1",
   "manifest_version": 2,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoWDu35r1oWfV8YVlJbXNOpqL3lhgO4wgyb7dfAcl6trIfwsQSg2W3EERJDbN3LzhYEmvszbrQlot+scVpK9WM94HbXag8IBEIiIh24WmX6xlv5PT3j2ibccXiJ9x/sCaP2MGRzPNkkO1hJjBIup6ogn3/U3ynbQ6lqdtYI9Ju0IWSNXIt493Ch/dvD1cjxPzLLcCcrU9O50evAm/gFknFiPla6UKqU6ApkUpnwO3L3emphEXtKcK1I/VfzCFDJ/7PUnOKVBiLwbQWZjSfhdLtdzdwovGgklr4XmicpEL//k5HO9zTjXd8eEL6Yo0ik1Kk/Skm9226B9rQnL6Od9WgwIDAQAB",
   "icons": {
@@ -12,6 +12,7 @@
   },
   "permissions": [
     "https://workflowy.com/*",
+    "https://www.workflowy.com/*",
     "https://beta.workflowy.com/*",
     "declarativeNetRequest",
     "declarativeContent",
@@ -32,7 +33,8 @@
   },
   "web_accessible_resources": [
     "https://workflowy.com/*",
-    "https://beta.workflowy.com",
+    "https://www.workflowy.com/*",
+    "https://beta.workflowy.com/*",
     "assets/icons/*",
     "content/content.html",
     "content/content.css"
@@ -41,6 +43,7 @@
     {
       "matches": [
         "https://workflowy.com/*",
+        "https://www.workflowy.com/*",
         "https://beta.workflowy.com/*"
       ],
       "all_frames": false,
