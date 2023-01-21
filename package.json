@@ -1,6 +1,8 @@
 {
   "name": "multiflow-extension",
   "description": "Columns view for WorkFlowy",
+  "author": "Dave Stewart",
+  "license": "ISC",
   "scripts": {
     "dev": "rollup -c scripts/build.js --watch",
     "build": "rollup -c scripts/build.js",
@@ -9,32 +11,31 @@
     "release": "npm run clean && npm run build && npm run zip",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Dave Stewart",
-  "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-buble": "^0.21.3",
-    "@rollup/plugin-multi-entry": "^4.0.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
-    "@rollup/plugin-replace": "^2.3.4",
-    "bestzip": "^2.1.7",
-    "eslint": "^7.19.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
+    "@rollup/plugin-multi-entry": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-replace": "^2.4.2",
+    "bestzip": "^2.2.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-promise": "^4.3.1",
     "merge-options": "^3.0.4",
+    "node-sass": "^8.0.0",
     "rimraf": "^3.0.2",
-    "rollup": "^2.38.5",
+    "rollup": "^2.79.1",
     "rollup-plugin-copy-watch": "0.0.1",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-node-externals": "^2.2.0",
-    "rollup-plugin-scss": "^2.6.1",
+    "rollup-plugin-scss": "^4.0.0",
     "rollup-plugin-string": "^3.0.0",
     "yargs": "^16.2.0"
   },
   "dependencies": {
-    "debounce": "^1.2.0",
-    "vue": "^2.6.12",
+    "debounce": "^1.2.1",
+    "vue": "^2.7.14",
     "vue-slicksort": "^1.2.0"
   }
 }
