@@ -12,6 +12,10 @@ import { isWfUrl } from '../helpers/config.js'
  * @property {HTMLElement}  element
  */
 export default class Frame {
+  get window () {
+    return this.element.contentWindow
+  }
+
   /**
    *
    * @param {Page}    parent
@@ -24,15 +28,11 @@ export default class Frame {
     this.loaded = false
   }
 
-  get window () {
-    return this.element.contentWindow
-  }
-
   // -------------------------------------------------------------------------------------------------------------------
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  create (container, src) {
+  init (container, src) {
     // blank frames
     const isHidden = !src
     src = src || 'about:blank'
@@ -41,11 +41,6 @@ export default class Frame {
     this.element = document.createElement('iframe')
     this.element.setAttribute('src', src)
     container.appendChild(this.element)
-
-    // don't show hidden frames
-    if (isHidden) {
-      this.hide()
-    }
 
     // set up load
     this.loaded = false
@@ -56,6 +51,15 @@ export default class Frame {
         return runWhen(checkReady(document), () => this.onReady())
       }
     })
+
+    // set up focus
+    this.window.addEventListener('focus', () => this.onFocus())
+    this.onFocus()
+
+    // don't show hidden frames
+    if (isHidden) {
+      this.hide()
+    }
 
     // return
     return this.element
@@ -139,6 +143,10 @@ export default class Frame {
   // -------------------------------------------------------------------------------------------------------------------
   // handlers
   // -------------------------------------------------------------------------------------------------------------------
+
+  onFocus () {
+    this.parent.onFrameFocused(this.element)
+  }
 
   onClick (type, href, hasModifier) {
     type === 'link'
