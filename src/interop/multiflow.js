@@ -24,24 +24,24 @@ export const MultiFlow = {
   /**
    * Hook into MultiFlow state changes
    *
-   * Available actions are:
+   * Available attributes are:
    *
    *  - mode    <string>  : either "workflowy" or "multiflow" depending if columns are visible
    *  - loading <boolean> : whether one or more frames are loading
    *  - frames  <number>  : the number of frames created (note: closed frames may be hidden!)
    *  - focused <number>  : the currently focused frame index
    *
-   * @example MultiFlow.onChange((action, value, oldValue) => if (action === 'mode') { ... })
+   * @example MultiFlow.onChange((attr, value, oldValue) => if (attr === 'mode') { ... })
    * @param callback
    */
   onChange (callback) {
     const observer = new MutationObserver(function (mutations, observer) {
       for (const mutation of mutations) {
         const { attributeName, target, oldValue } = mutation
-        const action = attributeName.substring(5)
+        const attr = attributeName.substring(5)
         const value = target.getAttribute(attributeName)
         if (oldValue !== value) {
-          callback(action, parse(value), parse(oldValue))
+          callback(attr, parse(value), parse(oldValue))
         }
       }
     })
