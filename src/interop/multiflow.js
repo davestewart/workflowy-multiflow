@@ -15,8 +15,8 @@ export const MultiFlow = {
     const mode = body.getAttribute('data-mode')
     if (mode === 'multiflow') {
       const frames = document.querySelectorAll('#multiflow iframe')
-      const index = body.getAttribute('data-focused') || '0'
-      return frames[Number(index)].contentWindow
+      const index = body.getAttribute('data-focused')
+      return frames[Number(index) || 0].contentWindow
     }
     return window
   },
