@@ -113,7 +113,7 @@ export default class Page {
     this.setLoading(true)
     const frame = new Frame(this, this.frames.length)
     this.frames.push(frame)
-    frame.create(this.container, src)
+    frame.init(this.container, src)
     this.updateLayout()
     return frame
   }
@@ -231,6 +231,12 @@ export default class Page {
       this.setLoading(false)
       this.updateSession()
     }
+  }
+
+  onFrameFocused (element) {
+    const frames = document.querySelectorAll('#multiflow iframe')
+    const index = [...frames].indexOf(element)
+    setSetting('focused', index)
   }
 
   onFrameNavigated () {

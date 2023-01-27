@@ -25,8 +25,22 @@ See the [home page](https://davestewart.co.uk/products/workflowy-multiflow) for 
 
 ## Development
 
-The extension is not compiled, so all JavaScript will just run as-is.
+To build the project, run:
 
+```bash
+npm run dev
+```
+
+To run the extension as you develop, load the unpacked extension:
+
+- Open Chrome
+- Go Window > Extensions
+- Click "Load unpacked"
+- Choose the project's `dist` folder
+
+You'll need to reload the extension from its settings page if you make changes.
+
+*TODO: migrate to a build setup that supports HMR*
 
 ## Releasing
 
@@ -38,6 +52,30 @@ npm run release
 A zip file will be saved to `../releases`.
 
 Upload this file to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole/8051cfa9-44b7-4869-9a94-1843ebf8c388?hl=en-GB) and publish using the tools provided.
+
+
+## Extension Interoperability
+
+Because MultiFlow uses `iframe`s to simulate columns, it can break other extensions which target WorkFlowy via the main `window` object.
+
+If you're an extension developer, you can use the code in [`src/interop/multiflow.js`](https://github.com/davestewart/workflowy-multiflow/tree/main/src/interop/multiflow.js) to grab the active frame (or main window), or respond to state changes:
+
+```js
+// copy and paste the MultiFlow Interop API
+const MultiFlow = { ... }
+
+// get a reference to the active frame or main window
+MultiFlow.getWindow()
+
+// log when MultiFlow state changes
+MultiFlow.onChange(function (attr, value, oldValue) {
+  console.log({ attr, value, oldValue })
+})
+```
+
+Hopefully this covers most use cases!
+
+If not, feel free to create an [issue](https://github.com/davestewart/workflowy-multiflow/issues).
 
 
 ## Assets

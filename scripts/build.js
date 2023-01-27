@@ -96,9 +96,11 @@ function bundle (name, options = {}) {
   // scss
   const styles = checkModule(name + '.scss', name + '.css')
   if (styles) {
+    config.assetFileNames = '[name][extname]'
     config.plugins.push(
       scss({
         output: styles.trgRel,
+        fileName: `${name}.css`,
       }),
     )
   }

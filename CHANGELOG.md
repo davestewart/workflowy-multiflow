@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v1.6.0] - 2023-01-21
+
+Added:
+
+- added extension interoperability API 
+
 ## [v1.5.1] - 2021-03-12
 
 Removed:
