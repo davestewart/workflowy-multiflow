@@ -16,7 +16,10 @@ export default class App {
    */
   constructor () {
     log('running!')
-    this.init()
+    return runWhen(
+      () => document.getElementById('loadingScreen').style.display === 'none',
+      () => this.init(),
+    )
   }
 
   // -------------------------------------------------------------------------------------------------------------------
