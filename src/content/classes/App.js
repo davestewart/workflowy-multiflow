@@ -16,7 +16,9 @@ export default class App {
    */
   constructor () {
     log('running!')
-    return runWhen(
+
+    // eslint-disable-next-line no-void
+    void runWhen(
       () => document.getElementById('loadingScreen').style.display === 'none',
       () => this.init(),
     )
