@@ -60,8 +60,17 @@ export default class App {
   }
 
   onReady () {
+    // ready
     log('page ready!')
     addListeners(window, this.onItemClick.bind(this))
+
+    // install message
+    if (!localStorage.getItem('installed')) {
+      const script = document.createElement('script')
+      script.textContent = 'WF.showMessage(`MultiFlow installed! To ensure correct functionality: disable the WorkFlowy setting "Open links in desktop app".`)'
+      document.head.appendChild(script)
+      localStorage.setItem('installed', '1')
+    }
   }
 
   // handle clicks on main workflowy page
