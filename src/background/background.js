@@ -1,5 +1,4 @@
 import { log, Sessions } from '../utils/app.js'
-// import { runCommand } from '../utils/chrome.js'
 
 log('background initialized!')
 
@@ -48,4 +47,11 @@ chrome.runtime.onMessage.addListener(function (request = {}, _sender, sendRespon
     sendResponse()
   }
   return true
+})
+
+// show instructions page on install
+chrome.runtime.onInstalled.addListener(function ({ reason }) {
+  if (reason === 'install') {
+    window.open('https://davestewart.co.uk/products/workflowy-multiflow/?utm_source=extension')
+  }
 })

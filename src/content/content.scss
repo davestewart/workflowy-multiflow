@@ -1,13 +1,10 @@
-html, body {
+html {
   width: 100%;
   height: 100%;
 }
 
 body {
   &[data-mode="workflowy"] {
-    #workflowy {
-      display: block;
-    }
     #multiflow {
       display: none;
     }
@@ -17,11 +14,12 @@ body {
     padding: 0;
     transition: none;
 
-    #workflowy {
-      display: none;
-    }
     #multiflow {
       display: block;
+    }
+
+    > *:not(#multiflow) {
+      display: none;
     }
   }
 
@@ -47,15 +45,12 @@ body {
   }
 }
 
-#workflowy {
-  height: 100%;
-}
-
 #multiflow {
+  height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  height: 100%;
+  display: none;
 
   main {
     display: flex;

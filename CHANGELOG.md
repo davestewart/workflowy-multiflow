@@ -6,115 +6,141 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v2.0.0] - 2023-09-17
+
+Changed:
+
+- Changed MultiFlow initialisation to prevent nesting WorkFlowy nodes
+
+Added:
+
+- Installation now opens WorkFlowy project page
+
+Fixed:
+
+- Fixed styling causing full-width layout issues
+
+## [v1.6.3] - 2023-09-17
+
+Added:
+
+- Added desktop links warning 
+
+## [v1.6.2] - 2023-09-14
+
+Fixed:
+
+- Fix bug with `App` constructor returning promise not `app` instance
+
 ## [v1.6.1] - 2023-02-21
 
 Fixed:
 
-- fixed bug with empty space at top of page in workflowy beta 
+- Fixed bug with empty space at top of page in workflowy beta 
 
 ## [v1.6.0] - 2023-01-21
 
 Added:
 
-- added extension interoperability API 
+- Added extension interoperability API 
 
 ## [v1.5.1] - 2021-03-12
 
 Removed:
 
-- removed option to choose where to open links, because it was more confusing than beneficial
+- Removed option to choose where to open links, because it was more confusing than beneficial
 
 
 ## [v1.5.0] - 2021-03-12
 
 Added:
 
-- added sessions sorting
+- Added sessions sorting
 
 
 ## [v1.4.2] - 2021-03-12
 
 Fixed:
 
-- fixed bug where sidebar would leave padding when switching to multiflow mode
+- Fixed bug where sidebar would leave padding when switching to multiflow mode
 
 
 ## [v1.4.1] - 2021-03-12
 
 Fixed:
 
-- fixed bug where multiflow didn't work on workflowy subdomains 
+- Fixed bug where multiflow didn't work on workflowy subdomains 
 
 
 ## [v1.4.0] - 2021-02-15
 
 Added:
 
-- extension now activates immediately on loading; no need to use the toolbar button
-- can now switch in and out of workflowy / multiflow modes by simply closing or opening panels
-- user can now save, load and remove multiple sessions
+- Extension now activates immediately on loading; no need to use the toolbar button
+- Can now switch in and out of workflowy / multiflow modes by simply closing or opening panels
+- User can now save, load and remove multiple sessions
 
 
 ## [v1.3.0] - 2021-02-12
 
 User interface:
 
-- completely new form-based UI
-- added Vue JS
+- Completely new form-based UI
+- Added Vue JS
 
 Functionality:
 
-- added settings for where links open
-- added manual session save / load
+- Added settings for where links open
+- Added manual session save / load
 
 Internal:
 
-- major refactor of internal code
-- added compilation / build pipeline
+- Major refactor of internal code
+- Added compilation / build pipeline
 
 
 ## [v1.2.1] - 2021-02-08
 
 Changes:
 
-- fixed loading bug
-- improved build script
+- Fixed loading bug
+- Improved build script
 
 
 ## [v1.2.0] - 2021-02-08
 
 Various improvements:
 
-- sync panel UI with current layout
-- improve and reduce frequency of save routine
-- add JS Doc comments
-- clarify popup code
-- move popup CSS to external file
-- minor bug fixes
+- Sync panel UI with current layout
+- Improve and reduce frequency of save routine
+- Add JS Doc comments
+- Clarify popup code
+- Move popup CSS to external file
+- Minor bug fixes
 
 
 ## [v1.1.0] - 2021-02-03
 
 Fixed:
 
-- css style which prevented workflowy.com from scrolling
-- bug with bullets and links
+- CSS style which prevented workflowy.com from scrolling
+- Bug with bullets and links
 
 Assets:
 
-- added readme
-- updated icons
-- added sketch file
+- Added readme
+- Updated icons
+- Added sketch file
 
 
 ## [v0.1.0] - 2021-02-02
 
 Initial release:
 
-- runs after user clicks on toolbar button
-- allows clicking on bullets and links to open new frames
-- graphical ui to change layout
-- caches frames as they load
+- Runs after user clicks on toolbar button
+- Allows clicking on bullets and links to open new frames
+- Graphical ui to change layout
+- Caches frames as they load
 
 
 [Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.1...HEAD

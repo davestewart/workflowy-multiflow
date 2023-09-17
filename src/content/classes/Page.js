@@ -1,9 +1,9 @@
 import { log } from '../../utils/app.js'
 import { callBackground } from '../../utils/chrome.js'
 import { getSetting, setSetting } from '../helpers/dom.js'
+import { getId, getTitle } from '../helpers/app.js'
 import { WF_WIDTH } from '../helpers/config.js'
 import Frame from './Frame.js'
-import { getId, getTitle } from '../helpers/app.js'
 
 /**
  * Manager class
@@ -28,12 +28,6 @@ export default class Page {
   // -------------------------------------------------------------------------------------------------------------------
 
   init () {
-    // workflowy
-    const workflowy = document.createElement('div')
-    workflowy.setAttribute('id', 'workflowy')
-    Array.from(document.body.children).forEach(child => workflowy.appendChild(child))
-    document.body.appendChild(workflowy)
-
     // multiflow
     const multiflow = document.createElement('div')
     multiflow.setAttribute('id', 'multiflow')
