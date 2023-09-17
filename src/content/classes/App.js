@@ -3,6 +3,7 @@ import { runWhen } from '../../utils/dom.js'
 import { addListeners, checkReady, getSetting, setSetting } from '../helpers/dom.js'
 import { makeWfUrl } from '../helpers/config.js'
 import Page from './Page.js'
+import { callBackground } from '../../utils/chrome'
 
 /**
  * Application class
@@ -45,7 +46,7 @@ export default class App {
     // session
     log('checking for session...')
     const id = location.hash.substring(2)
-    chrome.runtime.sendMessage({ command: 'page_loaded', value: id }, (session) => {
+    callBackground('page_loaded', id).then(session => {
       if (chrome.runtime.lastError) {
         console.warn('MultiFlow:', chrome.runtime.lastError.message)
       }
@@ -65,12 +66,13 @@ export default class App {
     addListeners(window, this.onItemClick.bind(this))
 
     // install message
-    if (!localStorage.getItem('installed')) {
-      const script = document.createElement('script')
-      script.textContent = 'WF.showMessage(`MultiFlow installed! To ensure correct functionality: disable the WorkFlowy setting "Open links in desktop app".`)'
-      document.head.appendChild(script)
-      localStorage.setItem('installed', '1')
-    }
+    callBackground('check_install').then(state => {
+      if (state) {
+        const script = document.createElement('script')
+        script.textContent = 'WF.showMessage(`MultiFlow installed! To ensure correct functionality: disable the WorkFlowy setting "Open links in desktop app".`)'
+        document.head.appendChild(script)
+      }
+    })
   }
 
   // handle clicks on main workflowy page

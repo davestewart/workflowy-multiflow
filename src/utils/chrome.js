@@ -20,7 +20,7 @@ export function callBackground (command, value) {
         console.log('received response:', ...args)
       }
       console.groupEnd()
-      resolve(args)
+      resolve(...args)
     })
   })
 }
