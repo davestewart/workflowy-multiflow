@@ -54,6 +54,13 @@ export function addListeners (window, handler) {
   }, { capture: true })
 }
 
+export function addScript (text) {
+  const script = document.createElement('script')
+  script.className = 'multiflow-script'
+  script.textContent = text
+  document.head.appendChild(script)
+}
+
 export function setSetting (key, value) {
   document.body.setAttribute('data-' + key, value)
 }

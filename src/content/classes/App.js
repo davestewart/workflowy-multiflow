@@ -1,6 +1,6 @@
 import { log, Settings } from '../../utils/app.js'
 import { runWhen } from '../../utils/dom.js'
-import { addListeners, checkReady, getSetting, setSetting } from '../helpers/dom.js'
+import { addListeners, addScript, checkReady, getSetting, setSetting } from '../helpers/dom.js'
 import { makeWfUrl } from '../helpers/config.js'
 import Page from './Page.js'
 import { callBackground } from '../../utils/chrome'
@@ -66,22 +66,23 @@ export default class App {
     // install message
     log('checking first run...')
     callBackground('check_install').then(state => {
+      // first run
       if (state) {
-        const script = document.createElement('script')
-        script.id = 'multiflow-check-install'
-        log('checking settings...')
-        script.textContent = `
+        addScript('WF.showMessage("MultiFlow installed! Remember to pin the extension icon to work with Layouts and Sessions.")')
+      }
+
+      // check for desktop app
+      else {
+        addScript(`
         fetch('/get_settings')
           .then(res => res.json())
           .then(json => !!json.features.open_links_in_desktop)
           .then(links => {
-            const message = links
-              ? 'To ensure correct functionality, disable the WorkFlowy setting "Open links in desktop app".'
-              : 'Remember to pin the extension icon to work with Layouts and Sessions.'
-            WF.showMessage('MultiFlow installed! ' + message)
+            if (links) {
+              WF.showMessage('MultiFlow: To ensure correct functionality, disable the WorkFlowy setting "Open links in desktop app".')
+            }
           })
-        `
-        document.head.appendChild(script)
+        `)
       }
     })
   }

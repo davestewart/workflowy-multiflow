@@ -6,12 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v2.0.3] - 2023-09-18
+
+Changed:
+
+- Checks settings to prompt to disable desktop app links on every load
+
 ## [v2.0.2] - 2023-09-18
 
 Changed:
 
 - Moved install-check function to helper
-- Checks settings before prompting to disable desktop app links
+- On install, checks settings before prompting to disable desktop app links
 - Added prompt to pin extension icon
 
 Fixed:
