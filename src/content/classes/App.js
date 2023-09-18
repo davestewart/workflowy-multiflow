@@ -89,14 +89,8 @@ export default class App {
   // handle clicks on main workflowy page
   onItemClick (_frame, url, hasModifier) {
     if (hasModifier) {
-      // determine current item
-      const projectId = document.querySelector('[projectid]').getAttribute('projectid')
-      const itemId = projectId !== 'None'
-        ? projectId.split('-').pop()
-        : ''
-
-      // load urls
-      const urls = [makeWfUrl('#' + itemId), url]
+      const left = makeWfUrl(window.location.href)
+      const urls = [left, url]
       this.setSession({
         id: 'multiflow',
         urls,
