@@ -2,7 +2,7 @@ import { log } from '../../utils/app.js'
 import { callBackground } from '../../utils/chrome.js'
 import { getSetting, setSetting } from '../helpers/dom.js'
 import { getId, getTitle } from '../helpers/app.js'
-import { WF_WIDTH } from '../helpers/config.js'
+import { makeWfUrl, WF_WIDTH } from '../helpers/config.js'
 import Frame from './Frame.js'
 
 /**
@@ -71,7 +71,7 @@ export default class Page {
     // if switching to workflowy, show the open frame
     if (!isMultiFlow) {
       const openFrame = this.getVisibleFrames().find(frame => frame !== closedFrame)
-      document.location.href = openFrame.window.location.href
+      window.location.href = makeWfUrl(openFrame.window.location.href)
     }
 
     // values
