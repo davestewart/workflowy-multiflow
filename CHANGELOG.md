@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v2.0.2] - 2023-09-18
+
+Changed:
+
+- Moved install-check function to helper
+- Checks settings before prompting to disable desktop app links
+- Added prompt to pin extension icon
+
+Fixed:
+
+- Fixed bug with search node not opening when launching MultiFlow mode
+- Fix bug with WorkFlowy reloading when closing panes and final pane is `/`
+
 ## [v2.0.1] - 2023-09-17
 
 Fixed:
