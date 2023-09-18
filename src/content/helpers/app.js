@@ -1,4 +1,5 @@
 import { slugify } from '../../utils/string.js'
+import { storage } from '../../utils/storage'
 
 export function getTitle (frame) {
   if (Array.isArray(frame)) {
@@ -16,4 +17,13 @@ export function getTitle (frame) {
 
 export function getId (frame) {
   return slugify(getTitle(frame))
+}
+
+export function checkInstall () {
+  const key = 'installed'
+  const firstRun = !storage.get(key)
+  if (firstRun) {
+    storage.set(key, 1)
+  }
+  return firstRun
 }

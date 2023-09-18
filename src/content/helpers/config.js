@@ -1,25 +1,34 @@
 export const WF_WIDTH = 700
 const rxUrl = /^(https?:\/\/)?(\w+\.)?workflowy.com/
-const rxPath = /^\/?#/
+const rxHash = /^\/?#/
 
-export function isWfUrl (path) {
-  return rxPath.test(path) || rxUrl.test(path)
+export function isWfUrl (input) {
+  return rxHash.test(input) || rxUrl.test(input)
 }
 
-export function makeWfUrl (path) {
-  if (!isWfUrl(path)) {
-    return path
+/**
+ * Ensure a valid WorkFlowy URL
+ *
+ * @param   {string}  input   Either a hash #xxxxxxxx or full WorkFlowy URL
+ * @param   {string}  origin  Optional WorkFlowy https:// origin
+ * @return  {string}          A sanitised URL
+ */
+export function makeWfUrl (input, origin = window.location.origin) {
+  // non wf urls; return as-is
+  if (!isWfUrl(input)) {
+    return input
   }
 
-  // current location
-  const { protocol, hostname } = window.location
-  const prefix = protocol + '//' + hostname
-
   // sanitize path
-  path = path
+  let path = input
     .replace(rxUrl, '')
-    .replace(rxPath, '/#')
+    .replace(rxHash, '/#')
+
+  // ensure path ends with hash
+  if (path.length < 2) {
+    path = '/#'
+  }
 
   // return url
-  return prefix + path
+  return origin + path
 }
