@@ -1,9 +1,13 @@
 // imports
+import { log } from '../utils/app'
 import './content.scss'
 import App from './classes/App.js'
 
 // global reference
 let app
+
+// debug
+log('running!')
 
 // only run in top frame
 if (window === window.top) {
