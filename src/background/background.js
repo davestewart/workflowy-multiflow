@@ -1,5 +1,5 @@
 import { log, Sessions } from '../utils/app.js'
-import { storage } from '../utils/storage'
+import { checkInstall } from '../content/helpers/app'
 
 log('background initialized!')
 
@@ -51,11 +51,7 @@ chrome.runtime.onMessage.addListener(function (request = {}, _sender, sendRespon
 
   // check install
   else if (command === 'check_install') {
-    const firstRun = !storage.get('installed')
-    if (firstRun) {
-      storage.set('installed', 1)
-    }
-    sendResponse(firstRun)
+    sendResponse(checkInstall())
   }
 
   // anything else

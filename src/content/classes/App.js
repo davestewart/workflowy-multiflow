@@ -66,10 +66,23 @@ export default class App {
     addListeners(window, this.onItemClick.bind(this))
 
     // install message
+    log('checking first run...')
     callBackground('check_install').then(state => {
       if (state) {
         const script = document.createElement('script')
-        script.textContent = 'WF.showMessage(`MultiFlow installed! To ensure correct functionality: disable the WorkFlowy setting "Open links in desktop app".`)'
+        script.id = 'multiflow-check-install'
+        log('checking settings...')
+        script.textContent = `
+        fetch('/get_settings')
+          .then(res => res.json())
+          .then(json => !!json.features.open_links_in_desktop)
+          .then(links => {
+            const message = links
+              ? 'To ensure correct functionality, disable the WorkFlowy setting "Open links in desktop app".'
+              : 'Remember to pin the extension icon to work with Layouts and Sessions.'
+            WF.showMessage('MultiFlow installed! ' + message)
+          })
+        `
         document.head.appendChild(script)
       }
     })
