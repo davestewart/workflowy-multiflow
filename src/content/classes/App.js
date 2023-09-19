@@ -71,19 +71,16 @@ export default class App {
         addScript('WF.showMessage("MultiFlow installed! Remember to pin the extension icon to work with Layouts and Sessions.")')
       }
 
-      // check for desktop app
-      else {
-        addScript(`
-        fetch('/get_settings')
-          .then(res => res.json())
-          .then(json => !!json.features.open_links_in_desktop)
-          .then(links => {
-            if (links) {
-              WF.showMessage('MultiFlow: To ensure correct functionality, disable the WorkFlowy setting "Open links in desktop app".')
-            }
-          })
-        `)
-      }
+      // disable desktop app links
+      // FIXME strangely, MultiFlow doesn't even run if desktop links are on
+      const command = 'WF.showMessage(\'MultiFlow: To ensure correct functionality, the setting "Open links in desktop app" has been disabled.\')'
+      addScript(`
+        const links = window?.feature('open_links_in_desktop')
+        if (links?.on) {
+          links.toggle()
+          ${!state && command}
+        }
+      `)
     })
   }
 
