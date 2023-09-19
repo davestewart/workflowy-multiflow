@@ -85,7 +85,7 @@ export default class App {
   }
 
   // handle clicks on main workflowy page
-  onItemClick (_frame, url, hasModifier) {
+  onItemClick (url, hasModifier, _type) {
     if (hasModifier) {
       const left = makeWfUrl(window.location.href)
       const urls = [left, url]

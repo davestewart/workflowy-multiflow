@@ -148,7 +148,7 @@ export default class Frame {
     this.parent.onFrameFocused(this.element)
   }
 
-  onClick (type, href, hasModifier) {
+  onClick (href, hasModifier, type) {
     type === 'link'
       ? this.parent.loadFrame(this, href, hasModifier)
       : this.parent.loadNextFrame(this, href)

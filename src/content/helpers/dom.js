@@ -16,42 +16,35 @@ export function getPage (frame) {
   return getDoc(frame).querySelector('.pageContainer')
 }
 
-export function addListeners (window, handler) {
-  // elements
-  const document = getDoc(window)
-  const page = getPage(window)
+function getLink (el, selector = 'a') {
+  return el.matches(selector)
+    ? el
+    : el.closest(selector)
+}
 
-  // duplicate frame handler
-  document.querySelector('.breadcrumbs').addEventListener('click', (event) => {
-    if (event.target.matches('a:last-of-type') && isModifier(event)) {
-      handler('page', window.location.href, true)
-    }
-  })
-
-  // bullet handler
-  page.addEventListener('click', (event) => {
-    const selector = 'a.bullet'
-    const target = event.target
-    const link = target.matches(selector)
-      ? target
-      : target.closest(selector)
-    if (link && isModifier(event)) {
-      handler('bullet', makeWfUrl(link.getAttribute('href')), true)
-      stop(event)
-    }
-  }, { capture: true })
-
-  // link handler
-  page.addEventListener('click', (event) => {
-    const el = event.target
-    if (el.tagName === 'A') {
-      const href = el.getAttribute('href')
-      if (isWfUrl(href)) {
-        handler('link', makeWfUrl(href), isModifier(event))
+export function addListeners (window, handler, type = 'page') {
+  // helper
+  function handleClicks (target, selector = 'a', type = 'page') {
+    target.addEventListener('click', (event) => {
+      const link = getLink(event.target, selector)
+      if (link && isModifier(event)) {
+        handler(makeWfUrl(link.href), true, type)
         stop(event)
       }
-    }
-  }, { capture: true })
+    }, { capture: true })
+  }
+
+  // elements
+  const doc = getDoc(window)
+  const page = getPage(window)
+  const breadcrumbs = doc.querySelector('.breadcrumbs')
+  const leftBar = doc.querySelector('.leftBar')
+
+  // areas
+  handleClicks(breadcrumbs)
+  handleClicks(leftBar, 'a[href^="/#/"]')
+  handleClicks(page, 'a.bullet', 'bullet')
+  handleClicks(page, 'a.contentLink', 'link')
 }
 
 export function addScript (text) {
