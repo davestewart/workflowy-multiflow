@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v2.0.4] - 2023-09-19
+
+Fixed:
+
+- Fix intermittent missing borders on Vivaldi
+
+Changed:
+
+- Change method to check desktop link settings
+
 ## [v2.0.3] - 2023-09-18
 
 Changed:
@@ -14,16 +24,16 @@ Changed:
 
 ## [v2.0.2] - 2023-09-18
 
+Fixed:
+
+- Fixed bug with search node not opening when launching MultiFlow mode
+- Fix bug with WorkFlowy reloading when closing panes and final pane is `/`
+
 Changed:
 
 - Moved install-check function to helper
 - On install, checks settings before prompting to disable desktop app links
 - Added prompt to pin extension icon
-
-Fixed:
-
-- Fixed bug with search node not opening when launching MultiFlow mode
-- Fix bug with WorkFlowy reloading when closing panes and final pane is `/`
 
 ## [v2.0.1] - 2023-09-17
 

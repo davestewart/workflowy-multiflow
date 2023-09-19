@@ -33,7 +33,6 @@ body {
 
   &[data-layout="fit-content"] iframe {
     max-width: 700px;
-    border-right: 1px solid #DDD;
   }
 
   &[data-frames="1"] iframe {
@@ -59,12 +58,10 @@ body {
 
   iframe {
     flex: 1;
+    margin: 0;
     height: 100%;
     border: none;
-  }
-
-  iframe:not(:last-child) {
-    border-right: 1px solid #DDD;
+    outline: 1px solid #DDD;
   }
 
   .hidden {
