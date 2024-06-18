@@ -1,10 +1,22 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable [changes](https://github.com/davestewart/workflowy-multiflow/tags) to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v3.0.0] - 2024-06-19
+
+Changed:
+
+- Major upgrade to Chrome Manifest V3
+
+Added:
+
+- Can now save single and multi-page sessions
+- Can now edit saved session titles
+- New interface
 
 ## [v2.1.0] - 2023-09-19
 
@@ -182,15 +194,3 @@ Initial release:
 - Allows clicking on bullets and links to open new frames
 - Graphical ui to change layout
 - Caches frames as they load
-
-
-[Unreleased]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.1...HEAD
-[v1.5.1]: https://github.com/davestewart/workflowy-multiflow/compare/v1.5.0...v1.5.1
-[v1.5.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.2...v1.5.0
-[v1.4.2]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.1...v1.4.2
-[v1.4.1]: https://github.com/davestewart/workflowy-multiflow/compare/v1.4.0...v1.4.1
-[v1.4.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.3.0...v1.4.0
-[v1.3.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.2.0...v1.3.0
-[v1.2.0]: https://github.com/davestewart/workflowy-multiflow/compare/v1.1.0...v1.2.0
-[v1.1.0]: https://github.com/davestewart/workflowy-multiflow/compare/v0.1.0...v1.1.0
-[v0.1.0]: https://github.com/davestewart/workflowy-multiflow/releases/tag/v0.1.0

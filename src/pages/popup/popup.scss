@@ -1,0 +1,255 @@
+// ---------------------------------------------------------------------------------------------------------------------
+// colors
+// ---------------------------------------------------------------------------------------------------------------------
+
+// greys
+$grey-lightest: #f6f5f7;
+$grey-lighter: #d9dfe2;
+$grey-light: #b7c4cf;
+$grey-darker: #434e51;
+$black: #2a3135;
+
+// colours
+$blue: #428ab3;
+
+// other
+$padding-button: .2rem .5rem;
+
+// ---------------------------------------------------------------------------------------------------------------------
+// layout
+// ---------------------------------------------------------------------------------------------------------------------
+
+body {
+  width: 450px;
+  font-size: 13px;
+  padding: 1.5em;
+  user-select: none;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: #434e51;
+  will-change: contents;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin-bottom: 1rem;
+  color: $black;
+
+  &__icon {
+    display: block;
+    img {
+      display: block;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  &__text {
+    display: block;
+    margin: 0 0 0 .4em;
+    font-size: 1.7rem;
+  }
+}
+
+.main {
+  position: relative;
+  opacity: 1;
+  transition: .4s opacity;
+  transition-delay: .1s;
+
+  &.hidden {
+    opacity: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// formatting
+// ---------------------------------------------------------------------------------------------------------------------
+
+hr {
+  border: none;
+  margin: .75rem 0;
+  background: $grey-lighter;
+  height: 1px;
+}
+
+a:active {
+  box-shadow: none;
+}
+
+a[disabled] {
+  text-decoration: none;
+  color: $grey-lighter;
+}
+
+.loading {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// forms
+// ---------------------------------------------------------------------------------------------------------------------
+
+form {
+  padding: 0 !important;
+}
+
+.form-group [class^="col"]:first-of-type {
+  color: $black;
+}
+
+.form-group .col-9 {
+  padding-top: .2rem;
+}
+
+.form-radio {
+  margin: 0;
+  padding: .1rem 0 .3rem 1.2rem;
+  cursor: pointer;
+}
+
+.form-select {
+  margin-top: 0.2rem;
+  border: 1px solid $grey-lighter;
+}
+
+.form-radio:hover {
+  color: $blue;
+}
+
+// hack to disable indeterminate checkboxes when styling radios as checkboxes
+.form-checkbox input:indeterminate+.form-icon {
+  background-color: white !important;
+  border-color: $grey-light;
+}
+
+.btn {
+  font-size: 13px;
+  border: none;
+  background: $grey-lightest;
+  color: $grey-darker;
+}
+
+.btn-group .btn {
+  border-color: $grey-light;
+  &:not(.active, :hover) {
+    color: $grey-light;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// elements
+// ---------------------------------------------------------------------------------------------------------------------
+
+.sessions {
+  margin-top: 1rem;
+  border-top: 1px solid $grey-lighter;
+  padding-top: .7rem;
+
+  &__list {
+    //padding-bottom: .7rem;
+    //border-bottom: 1px solid $grey-lighter;
+    //margin-bottom: 1em;
+  }
+
+  .form-checkbox, .form-radio, .form-switch {
+    margin: 0 !important;
+  }
+}
+
+.session {
+
+  &__text {
+    display: flex;
+    justify-content: space-between;
+    min-height: 2em;
+    cursor: pointer;
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__delete {
+    display: none;
+    padding: $padding-button;
+    font-size: 1.3em;
+    line-height: 1em;
+    color: $grey-light;
+    font-weight: bold;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+
+  &__text:hover &__delete {
+    display: block;
+  }
+}
+
+.sessions__list[data-sorting] {
+  .session__delete {
+    display: none !important;
+  }
+}
+
+.sessionAction {
+  margin-top: -.3rem;
+  margin-left: 1.35rem;
+
+  > * {
+    display: inline-block;
+    padding: .1rem .4rem;
+  }
+
+  &__status {
+    color: $grey-light;
+  }
+
+  &__button {
+    /*
+    outline: none !important;
+    box-shadow: none !important;
+    &:not([disabled]):hover {
+      text-decoration: underline;
+    }
+    &[disabled] {
+      cursor: default;
+    }
+    */
+  }
+
+}
+
+.links {
+  position: relative;
+  right: -.25rem;
+  bottom: -.25rem;
+  text-align: right;
+  font-size: 0;
+
+  a {
+    display: inline-block;
+    padding: .2em .6em;
+    font-size: 10px;
+    color: $grey-light;
+    text-decoration: none;
+
+    &:not(:first-child) {
+      border-left: 1px solid $grey-lighter;
+    }
+  }
+
+  a:hover {
+    color: $blue;
+  }
+}
