@@ -125,7 +125,7 @@ form {
 
 // hack to disable indeterminate checkboxes when styling radios as checkboxes
 .form-checkbox input:indeterminate+.form-icon {
-  background-color: transparent !important;
+  background-color: white !important;
   border-color: $grey-light;
 }
 
@@ -156,6 +156,10 @@ form {
     //padding-bottom: .7rem;
     //border-bottom: 1px solid $grey-lighter;
     //margin-bottom: 1em;
+  }
+
+  .form-checkbox, .form-radio, .form-switch {
+    margin: 0 !important;
   }
 }
 
@@ -192,7 +196,7 @@ form {
   }
 }
 
-.sessions[data-sorting] {
+.sessions__list[data-sorting] {
   .session__delete {
     display: none !important;
   }

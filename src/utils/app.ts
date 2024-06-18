@@ -5,25 +5,11 @@ export type Layout = 'hug' | 'fill' | 'nav' // | 'custom'
 export interface Session {
   id: string
   title: string
-  settings: Settings
+  settings: {
+    [key: string]: any
+    layout: Layout
+  }
   urls: string[]
-}
-
-export interface Settings {
-  [key: string]: any
-  layout: Layout
-}
-
-export const Settings = {
-  async get (): Promise<Settings> {
-    return storage.get('settings', {
-      layout: 'fill',
-    })
-  },
-
-  set (value: Settings) {
-    void storage.set('settings', value)
-  },
 }
 
 export const Sessions = {

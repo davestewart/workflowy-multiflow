@@ -72,7 +72,7 @@
                        @update:list="onSortInput"
             >
               <template #item="{ item, index }">
-                <label class="form-checkbox">
+                <label class="form-checkbox" style="position: relative">
                   <input v-model="session.id"
                          :value="item.id"
                          type="radio"
@@ -111,7 +111,7 @@ import { isEqual } from 'lodash'
 import { toRaw } from 'vue'
 import { makeBus } from 'bus'
 import { SlickItem, SlickList } from 'vue-slicksort'
-import { clone, Layout, Session, Sessions, Settings } from '@utils/app'
+import { clone, Layout, Session, Sessions } from '@utils/app'
 
 export default {
   components: {
@@ -144,12 +144,11 @@ export default {
 
   computed: {
     bus () {
-      const self = this
       return makeBus('popup', {
         target: 'background',
         handlers: {
-          setLoading: this.setLoading.bind(self),
-          setSession: this.setSession.bind(self)
+          setLoading: this.setLoading.bind(this),
+          setSession: this.setSession.bind(this)
         },
       })
     },
@@ -207,8 +206,7 @@ export default {
   },
 
   async created () {
-    // get settings and sessions
-    this.session.settings = await Settings.get()
+    // get sessions
     this.sessions = await Sessions.get()
 
     // watch settings changes

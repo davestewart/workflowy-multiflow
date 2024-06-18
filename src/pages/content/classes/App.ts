@@ -1,4 +1,4 @@
-import { log, Session, Settings } from '@utils/app'
+import { log, Session } from '@utils/app'
 import { runWhen } from '@utils/dom'
 import { addListeners, addScript, checkReady, getSetting, observeNavigation, setSetting } from '../helpers/dom'
 import { makeWfUrl, parseRootUrl } from '../helpers/url'
@@ -52,18 +52,7 @@ export default class App {
     setSetting('mode', 'workflowy')
 
     // navigation
-    observeNavigation(window, this.onNavigate.bind(this))
-
-    // session settings
-    const settings = await Settings.get()
-    this.setSettings(settings)
-
-    // session
-    log('checking for session...')
-    const id = location.hash.substring(2)
-    this.bus.call('background:getSession', id).then(session => {
-      this.setSession(session)
-    })
+    // observeNavigation(window, this.onNavigate.bind(this))
 
     // wait for ready...
     log('waiting for load...')
