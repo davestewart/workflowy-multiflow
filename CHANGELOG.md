@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
-## [v3.0.0] - 2024-06-19
+## [v3.0.1] - 2024-06-19
+
+Fixed:
+
+- Fixed handling of "Open links in desktop app" by moving from content to popup
+
+## [v3.0.0] - 2024-06-18
 
 Changed:
 

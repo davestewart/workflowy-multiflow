@@ -18,8 +18,8 @@ export default [
   {
     ignores: [
       'dist/**/*',
-      '.wxt/**/*'
-    ]
+      '.wxt/**/*',
+    ],
   },
 
   /**
@@ -27,7 +27,7 @@ export default [
    */
   {
     env: {
-      webextensions: true
+      webextensions: true,
     },
 
     // ignore auto-import globals
@@ -41,20 +41,21 @@ export default [
 
     // process these files
     files: [
-      'src/**/*.{ts,vue}'
+      'src/**/*.{ts,vue}',
     ],
 
     // additional rules
     rules: {
       // javascript
       'brace-style': ['error', 'stroustrup'],
+      'comma-dangle': ['error', 'always-multiline'],
 
       // vue
       'vue/require-default-prop': 0,
       'vue/max-attributes-per-line': ['error', {
         singleline: { max: 4 },
-        multiline: { max: 1 }
-      }]
-    }
-  }
+        multiline: { max: 1 },
+      }],
+    },
+  },
 ]

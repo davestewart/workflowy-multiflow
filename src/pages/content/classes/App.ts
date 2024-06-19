@@ -59,6 +59,13 @@ export default class App {
     return runWhen(checkReady(window.document), () => this.onReady())
   }
 
+  /**
+   * Note that MultiFlow doesn't even load if WorkFlowy's "Open links in desktop app"
+   * setting is on, so this function will never run. Currently, this situation is
+   * handled in the popup. Note that features can normally be queried using:
+   *
+   * window?.feature('open_links_in_desktop')
+   */
   onReady () {
     // ready
     log('page ready!')
@@ -71,10 +78,6 @@ export default class App {
       if (!state) {
         addScript('installed')
       }
-
-      // disable desktop app links
-      // FIXME strangely, MultiFlow doesn't even run if desktop links are on
-      addScript('links')
     })
 
     // load pages if encoded in the URL

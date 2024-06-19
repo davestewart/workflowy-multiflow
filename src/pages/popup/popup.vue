@@ -10,7 +10,18 @@
     <h3 class="header__text">WorkFlowy <strong>MultiFlow</strong></h3>
   </header>
 
-  <main class="main">
+  <div v-if="error" class="d-block">
+    <h6 class="text-error pb-2">Unable to communicate with the WorkFlowy page</h6>
+    <p>To fix this:</p>
+    <ol>
+      <li>Open WorkFlowy's settings panel</li>
+      <li>Toggle off "Open links in desktop app"</li>
+      <li>Reload the page</li>
+    </ol>
+  </div>
+
+  <main v-else class="main">
+
     <form class="form-horizontal">
 
       <!-- title -->
@@ -139,6 +150,8 @@ export default {
       updating: false,
 
       sorting: false,
+
+      error: false,
     }
   },
 
@@ -228,6 +241,7 @@ export default {
      */
     async getData () {
       const data = await this.bus.callTab(true, 'getData')
+      console.log(data)
       if (data) {
         this.session = data.session
         const session = this.sessions.find(session => session.id === data.session.id)
@@ -240,6 +254,9 @@ export default {
           this.session.settings.layout = 'fill'
           void this.setSetting('layout', 'fill')
         }
+      }
+      else {
+        this.error = true
       }
     },
 
