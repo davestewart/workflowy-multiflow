@@ -2,7 +2,7 @@ import { type Bus, makeBus } from 'bus'
 import { log } from '@utils/app'
 import { getSetting, setSetting } from '../helpers/dom'
 import { getTitle } from '../helpers/app.js'
-import { makeWfUrl, WF_WIDTH } from '../helpers/url'
+import { cleanRootUrl, getHash, makeRootUrl, makeWfUrl, WF_WIDTH } from '../helpers/url'
 import Frame, { type FrameData } from './Frame'
 
 /**
@@ -153,6 +153,7 @@ export default class Page {
       this.frames.push(frame)
       frame.hide()
       this.updateLayout()
+      this.updateSession()
     }
     else {
       this.switchMode(false, frame)
@@ -165,6 +166,7 @@ export default class Page {
       this.frames.splice(index, 1)
       this.container!.removeChild(frame.element!)
       this.updateLayout()
+      this.updateSession()
     }
     else {
       this.switchMode(false, frame)
@@ -199,14 +201,12 @@ export default class Page {
     const session = this.getSession()
     this.setTitle(session.title)
 
+    // update url
+    const path = makeRootUrl(session.urls, true)
+    history.replaceState(null, '', path)
+
     // update popup
     // void this.bus.call('popup:setSession', session)
-
-    // update url
-    // const ids = session.id.split('/')
-    // const url = makeRootUrl(ids, location.href)
-    // console.log('url', url)
-    // window.location.replace(url)
   }
 
   getSession (): Session {
@@ -239,9 +239,10 @@ export default class Page {
   }
 
   getRootData (): FrameData {
+    const url = cleanRootUrl()
     return {
-      url: document.location.href,
-      hash: document.location.hash.substring(2),
+      url: url.toString(),
+      hash: getHash(url),
       title: document.title,
     }
   }
@@ -257,7 +258,7 @@ export default class Page {
       .getVisibleFrames()
       .map(frame => frame.getData())
 
-    // if no frames, add fake ones
+    // if no frames, add fake one
     if (frames.length === 0) {
       frames.push(this.getRootData())
     }

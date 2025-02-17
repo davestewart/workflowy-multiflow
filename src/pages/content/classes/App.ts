@@ -30,10 +30,13 @@ export default class App {
       }
     })
 
+    // parse url before WF gets a chance to modify it
+    const urls = parseRootUrl(true)
+
     // eslint-disable-next-line no-void
     void runWhen(
       () => document.getElementById('loadingScreen')?.style.display === 'none',
-      () => this.init(),
+      () => this.init(urls),
     )
   }
 
@@ -41,7 +44,7 @@ export default class App {
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  async init () {
+  async init (urls: string[]) {
     // page
     log('updating page structure')
     this.page = new Page()
@@ -56,7 +59,7 @@ export default class App {
 
     // wait for ready...
     log('waiting for load...')
-    return runWhen(checkReady(window.document), () => this.onReady())
+    return runWhen(checkReady(window.document), () => this.onReady(urls))
   }
 
   /**
@@ -66,7 +69,7 @@ export default class App {
    *
    * window?.feature('open_links_in_desktop')
    */
-  onReady () {
+  onReady (urls: string[]) {
     // ready
     log('page ready!')
     addListeners(window, this.onItemClick.bind(this))
@@ -81,7 +84,6 @@ export default class App {
     })
 
     // load pages if encoded in the URL
-    const urls = parseRootUrl(true)
     if (urls.length > 1) {
       this.page?.load(urls)
     }
