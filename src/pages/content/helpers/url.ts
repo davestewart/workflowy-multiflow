@@ -1,55 +1,110 @@
 export const WF_WIDTH = 700
+
+const ORIGIN = window.location.origin
+const PREFIX = 'frame_'
+
 const rxUrl = /^(https?:\/\/)?(\w+\.)?workflowy.com\b/
 const rxHash = /^\/?#/
 
-const SEP = '%20' // space
-const ORIGIN = window.location.origin
+/**
+ * Test if a URL is a WF URL
+ */
+export function isWfUrl (input: string) {
+  return rxHash.test(input) || rxUrl.test(input)
+}
+
+/**
+ * Get the hash content of a URL
+ */
+export function getHash (url: string) {
+  return new URL(url).hash.replace(/^#\/?/, '')
+}
+
+/**
+ * Parse the hash / route of a URL into hash, search and params
+ */
+export function parseRoute (url: string) {
+  const { origin, hash } = new URL(url)
+  const [id, search] = hash.split('?')
+  const params = new URLSearchParams(search)
+  return { origin, id: id.replace('#', ''), search, params }
+}
 
 /**
  * Parse MultiFlow URL into WorkFlowy ids or WorkFlowy urls
  *
- * A MultiFlow URL contains 2 ids separated by %20 tokens:
+ * A MultiFlow URL contains a query with ids encoded as id_n=xxxxxxxxxxxx
  *
  * https://workflowy.com/#/fa901479206c?ids=fa901479206c%20ed7149b5e538
  *
  */
 export function parseRootUrl (asUrls = false) {
-  const hash = window.location.hash
-  const matches = hash.replace(/#.*\?/, '').match(/^ids=(.+)/)
-  if (matches) {
-    const [ _all, idsStr ] = matches
-    const ids = idsStr.split(SEP).filter(s => s)
-    return asUrls
-      ? ids.map(id => `https://workflowy.com/#/${id}`)
-      : ids
-  }
-  return []
+  // convert into url params
+  const { params } = parseRoute(location.href)
+
+  // grab keys and values from params object
+  const entries = Array.from(params.entries())
+
+  // process and extract frame ids
+  return entries.reduce((urls, [key, value]) => {
+    if (key.startsWith(PREFIX)) {
+      urls.push(asUrls
+        ? `${ORIGIN}/#${value}`
+        : value)
+    }
+    return urls
+  }, [] as string[])
 }
 
 /**
- * Serialise ids into a MultiFlow URL
+ * Serialise frame urls into a MultiFlow URL
+ *
+ * @param urls
+ * @param pathOnly
  */
-export function makeRootUrl (ids: string[], href: string) {
-  // create URL from
-  const url = new URL(href)
+export function makeRootUrl (urls: string[], pathOnly = false) {
+  // convert array of frame urls to object of url hashes
+  const obj = urls.reduce((params, value, index) => {
+    params[`${PREFIX}${index + 1}`] = getHash(value)
+    return params
+  }, {} as Record<string, string>)
 
-  // ensure there is a hash
-  if (!url.hash) {
-    url.hash = '/'
-  }
+  // convert object to url params
+  const params = new URLSearchParams(obj)
 
-  // current id
-  const match = url.hash.match(/#\/([^?]+)/)
-  const id = match ? match[1] : `` // ${ids[0]}
+  // generate full url
+  const url = new URL(ORIGIN)
+  url.hash = '?' + params.toString()
 
-  // build query
-  const query = ids.join(SEP)
+  // return
+  return pathOnly
+    ? '/' + url.hash
+    : url.toString()
+}
 
-  // add query
-  url.hash = `#${id ? `/${id}` : ''}?ids=${query}`
+/**
+ * Return WorkFlowy root URL without frame parameters
+ */
+export function cleanRootUrl () {
+  // get query
+  const { origin, id, search } = parseRoute(location.href)
 
-  // return new URL
-  return url.toString()
+  // convert to params
+  const params = new URLSearchParams(search)
+  const keys = Array.from(params.keys())
+
+  // clean params
+  keys.forEach((key) => {
+    if (key.startsWith(PREFIX)) {
+      params.delete(key)
+    }
+  })
+
+  // convert params to string
+  const newSearch = params.toString()
+
+  // return final cleaned string
+  return origin + '/#' + id + (newSearch ? '?' + newSearch : '')
 }
 
 /**
@@ -77,8 +132,4 @@ export function makeWfUrl (input: string, origin: string = ORIGIN) {
 
   // return url
   return origin + path
-}
-
-export function isWfUrl (input: string) {
-  return rxHash.test(input) || rxUrl.test(input)
 }

@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [v3.1.0] - 2025-02-17
+
+Added:
+
+- Added functionality to reload frames on page reload
+- URL is now also bookmarkable and copyable
+
 ## [v3.0.1] - 2024-06-19
 
 Fixed:
