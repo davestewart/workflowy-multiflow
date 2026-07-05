@@ -24,6 +24,18 @@ export function getHash (url: string) {
 }
 
 /**
+ * Decode a URL component, passing malformed input through rather than throwing
+ */
+function tryDecode (value: string) {
+  try {
+    return decodeURIComponent(value)
+  }
+  catch {
+    return value
+  }
+}
+
+/**
  * Parse the hash / route of a URL into hash, search and params
  */
 export function parseRoute (url: string) {
@@ -43,13 +55,19 @@ export function parseRoute (url: string) {
  */
 export function parseRootUrl (asUrls = false) {
   // convert into url params
-  const { params } = parseRoute(location.href)
+  const { params, search } = parseRoute(location.href)
+
+  // frames are read from the raw search, as URLSearchParams' decoding would corrupt
+  // hashes containing encoded delimiter characters before we split on them
+  const raw = (search || '')
+    .split('&')
+    .find(pair => pair.startsWith(FRAMES + '='))
 
   // grab hashes from frames param
-  const hashes = (params.get(FRAMES) || '')
+  const hashes = (raw ? raw.slice(FRAMES.length + 1) : '')
     .split(',')
     .filter(Boolean)
-    .map(decodeURIComponent)
+    .map(tryDecode)
 
   // return
   return {
