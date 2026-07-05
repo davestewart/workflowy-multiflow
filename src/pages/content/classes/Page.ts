@@ -16,6 +16,9 @@ export default class Page {
 
   public bus!: Bus
 
+  // create a history entry (rather than replace) when the loading frames are ready
+  private pendingPush = false
+
   constructor () {
     this.frames = []
   }
@@ -28,7 +31,7 @@ export default class Page {
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  async init () {
+  init () {
     // multiflow
     const multiflow = document.createElement('div')
     multiflow.setAttribute('id', 'multiflow')
@@ -44,16 +47,9 @@ export default class Page {
 
       }
     })
-
-    // reload
-    const tabId = await this.bus.call('background:getTabId')
-    window.addEventListener('beforeunload', async (event) => {
-      const session = this.getSession()
-      localStorage.setItem('session', JSON.stringify({ tabId, session }));
-    });
   }
 
-  load (urls: string[] = []) {
+  load (urls: string[] = [], push = false) {
     // if only one URL, don't use frames
     if (urls.length === 1) {
       window.location.href = urls[0]
@@ -61,6 +57,7 @@ export default class Page {
 
     // update frames
     else {
+      this.pendingPush ||= push
       const max = Math.max(urls.length, this.numVisible)
       for (let i = 0; i < max; i++) {
         const frame = this.frames[i]
@@ -71,7 +68,7 @@ export default class Page {
             : this.addFrame(url)
         }
         else {
-          this.hideFrame(frame)
+          this.hideFrame(frame, false)
         }
       }
     }
@@ -153,27 +150,27 @@ export default class Page {
     }
   }
 
-  hideFrame (frame: Frame): void {
+  hideFrame (frame: Frame, push = true): void {
     if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.frames.push(frame)
       frame.hide()
       this.updateLayout()
-      this.updateSession()
+      this.updateSession(push)
     }
     else {
       this.switchMode(false, frame)
     }
   }
 
-  removeFrame (frame: Frame): void {
+  removeFrame (frame: Frame, push = true): void {
     if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.container!.removeChild(frame.element!)
       this.updateLayout()
-      this.updateSession()
+      this.updateSession(push)
     }
     else {
       this.switchMode(false, frame)
@@ -203,16 +200,24 @@ export default class Page {
     }
   }
 
-  updateSession (): void {
+  /**
+   * Sync the document title and URL with the current frames
+   *
+   * @param push  Create a browser history entry (structural changes: open / close / load
+   *              session) rather than updating the current one (in-frame navigation, layout)
+   */
+  updateSession (push = false): void {
     // title
     const session = this.getSession()
     this.setTitle(session.title)
-    console.log(session.title)
 
     // update url
     const path = makeRootUrl(session, true)
+    const changed = location.pathname + location.hash !== path
     log('updating history:', path)
-    history.replaceState(null, '', path)
+    push && changed
+      ? history.pushState(null, '', path)
+      : history.replaceState(null, '', path)
   }
 
   getSession (): Session {
@@ -289,7 +294,8 @@ export default class Page {
     log(`loaded ${numLoaded} of ${frames.length} frames`)
     if (numLoaded === frames.length) {
       this.setLoading(false)
-      this.updateSession()
+      this.updateSession(this.pendingPush)
+      this.pendingPush = false
     }
   }
 

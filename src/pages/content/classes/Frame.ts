@@ -120,7 +120,11 @@ export default class Frame {
   // ---------------------------------------------------------------------------------------------------------------------
 
   load (href: string) {
-    this.window.location.href = href
+    // replace, not assign; frame loads should not create browser history entries
+    const current = this.window.location.href
+    if (!isWfUrl(current) || getHash(current) !== getHash(href)) {
+      this.window.location.replace(href)
+    }
     this.show()
   }
 
@@ -168,8 +172,4 @@ export default class Frame {
       ? this.parent.loadFrame(this, href, hasModifier, type)
       : this.parent.loadNextFrame(this, href)
   }
-}
-
-function getData () {
-
 }

@@ -6,12 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
-## [v3.1.0] - 2025-02-17
+## [v3.1.0] - 2026-07-05
 
 Added:
 
-- Added functionality to reload frames on page reload
-- URL is now also bookmarkable and copyable
+- Frames and layout are now serialised in the URL, so sessions survive a reload, and can be bookmarked and copied
+- Back and forward buttons now step between MultiFlow states (opening and closing frames, loading sessions)
 
 ## [v3.0.1] - 2024-06-19
 

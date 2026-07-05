@@ -3,7 +3,8 @@ import { type Session } from '@utils/app'
 export const WF_WIDTH = 700
 
 const ORIGIN = window.location.origin
-const PREFIX = 'frame_'
+const FRAMES = 'f'
+const LAYOUT = 'l'
 
 const rxUrl = /^(https?:\/\/)?(\w+\.)?workflowy.com\b/
 const rxHash = /^\/?#/
@@ -35,32 +36,25 @@ export function parseRoute (url: string) {
 /**
  * Parse MultiFlow URL into WorkFlowy ids or WorkFlowy urls
  *
- * A MultiFlow URL contains a query with ids encoded as id_n=xxxxxxxxxxxx
+ * A MultiFlow URL contains a query with frame hashes encoded as a comma-delimited list:
  *
- * https://workflowy.com/#/fa901479206c?ids=fa901479206c%20ed7149b5e538
+ * https://workflowy.com/#?f=fa901479206c,ed7149b5e538&l=nav
  *
  */
 export function parseRootUrl (asUrls = false) {
   // convert into url params
   const { params } = parseRoute(location.href)
 
-  // grab keys and values from params object
-  const entries = Array.from(params.entries())
-
-  // grab urls
-  const urls = entries.reduce((urls, [key, value]) => {
-    if (key.startsWith(PREFIX)) {
-      urls.push(asUrls
-        ? `${ORIGIN}/#${value}`
-        : value)
-    }
-    return urls
-  }, [] as string[])
+  // grab hashes from frames param
+  const hashes = (params.get(FRAMES) || '')
+    .split(',')
+    .filter(Boolean)
+    .map(decodeURIComponent)
 
   // return
   return {
-    urls,
-    layout: params.get('layout') as Layout || undefined,
+    urls: hashes.map(hash => asUrls ? `${ORIGIN}/#${hash}` : hash),
+    layout: params.get(LAYOUT) as Layout || undefined,
   }
 }
 
@@ -74,28 +68,22 @@ export function makeRootUrl (session: Session, pathOnly = false) {
   // settings
   const { urls, settings } = session
 
-  // convert array of frame urls to object of url hashes
-  const obj = urls.reduce((params, value, index) => {
-    params[`${PREFIX}${index + 1}`] = getHash(value)
-    return params
-  }, {} as Record<string, string>)
-
-  // convert object to url params
-  const params = new URLSearchParams(obj)
+  // serialised by hand, as URLSearchParams would percent-encode the comma delimiters;
+  // node hashes are word characters so pass through untouched, but hashes with search
+  // queries (#/abc?q=foo) need escaping to not corrupt the outer query
+  const hashes = urls.map(url => encodeURIComponent(getHash(url)))
+  const parts = [`${FRAMES}=${hashes.join(',')}`]
 
   // optionally add layout
   if (settings.layout && settings.layout !== 'fill' && urls.length > 1) {
-    params.set('layout', settings.layout)
+    parts.push(`${LAYOUT}=${settings.layout}`)
   }
 
-  // generate full url
-  const url = new URL(ORIGIN)
-  url.hash = '?' + params.toString()
-
   // return
+  const path = '/#?' + parts.join('&')
   return pathOnly
-    ? '/' + url.hash
-    : url.toString()
+    ? path
+    : ORIGIN + path
 }
 
 /**
@@ -111,7 +99,7 @@ export function cleanRootUrl () {
 
   // clean params
   keys.forEach((key) => {
-    if (key.startsWith(PREFIX)) {
+    if (key === FRAMES || key === LAYOUT) {
       params.delete(key)
     }
   })

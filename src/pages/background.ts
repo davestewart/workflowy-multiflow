@@ -64,10 +64,6 @@ export default defineBackground(() => {
 
       async checkInstall () {
         return checkInstall()
-      },
-
-      async getTabId (_, { tab }) {
-        return tab?.id
       }
     }
   })

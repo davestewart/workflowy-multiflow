@@ -30,6 +30,9 @@ export default class App {
       }
     })
 
+    // respond to back / forward
+    window.addEventListener('popstate', () => this.onPopState())
+
     // parse url before WF gets a chance to modify it
     const { urls, layout } = parseRootUrl(true)
 
@@ -65,7 +68,7 @@ export default class App {
     // load pages if encoded in the URL
     if (urls.length > 1) {
       log('loading frames')
-      this.setUrls(urls)
+      this.setUrls(urls, false)
       if (layout) {
         this.setSetting('layout', layout, false)
       }
@@ -114,9 +117,20 @@ export default class App {
     }
   }
 
-  onNavigate () {
-    const data = this.getData()
-    // void this.bus.call('popup:setSession', data.session)
+  // sync frames when the user navigates back / forward
+  onPopState () {
+    const { urls, layout } = parseRootUrl(true)
+
+    // multiflow url; diff-load frames without touching history
+    if (urls.length > 1 && this.page) {
+      this.setSetting('layout', layout || 'fill', false)
+      this.page.load(urls)
+    }
+
+    // plain workflowy url; reload to hand the page back to workflowy
+    else if (getSetting('mode') === 'multiflow') {
+      window.location.reload()
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -137,11 +151,10 @@ export default class App {
     }
   }
 
-  setUrls (urls: string[]): void {
+  setUrls (urls: string[], push = true): void {
     if (Array.isArray(urls)) {
       setTimeout(() => {
-        this.page!.load(urls)
-        window.location
+        this.page!.load(urls, push)
       }, 100)
     }
   }
