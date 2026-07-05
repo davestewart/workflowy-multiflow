@@ -1,5 +1,4 @@
 import { storage } from '@utils/storage'
-import { FrameData } from '../classes/Frame'
 
 export function getTitle <T extends { title: string }>(frame: T | T[]): string {
   if (Array.isArray(frame)) {

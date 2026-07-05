@@ -1,6 +1,6 @@
-import { log, Session } from '@utils/app'
+import { log, type Session, type Layout } from '@utils/app'
 import { runWhen } from '@utils/dom'
-import { addListeners, addScript, checkReady, getSetting, observeNavigation, setSetting } from '../helpers/dom'
+import { addListeners, addScript, checkReady, getSetting, setSetting } from '../helpers/dom'
 import { makeWfUrl, parseRootUrl } from '../helpers/url'
 import Page from './Page'
 import { Bus, makeBus } from 'bus'
@@ -30,18 +30,32 @@ export default class App {
       }
     })
 
-    // eslint-disable-next-line no-void
-    void runWhen(
-      () => document.getElementById('loadingScreen')?.style.display === 'none',
-      () => this.init(),
-    )
+    // respond to back / forward
+    window.addEventListener('popstate', () => this.onPopState())
+
+    // parse url before WF gets a chance to modify it
+    const { urls, layout } = parseRootUrl(true)
+
+    // if we have URLs, immediately load frames
+    if (urls.length) {
+      void this.init(urls, layout)
+    }
+
+    // otherwise, load normally
+    else {
+      // eslint-disable-next-line no-void
+      void runWhen(
+        () => document.getElementById('loadingScreen')?.style.display === 'none',
+        () => this.init(urls, layout)
+      , 250)
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  async init () {
+  async init (urls: string[], layout?: Layout | undefined) {
     // page
     log('updating page structure')
     this.page = new Page()
@@ -51,12 +65,20 @@ export default class App {
     log('loading settings')
     setSetting('mode', 'workflowy')
 
-    // navigation
-    // observeNavigation(window, this.onNavigate.bind(this))
+    // load pages if encoded in the URL
+    if (urls.length > 1) {
+      log('loading frames')
+      this.setUrls(urls, false)
+      if (layout) {
+        this.setSetting('layout', layout, false)
+      }
+    }
 
     // wait for ready...
-    log('waiting for load...')
-    return runWhen(checkReady(window.document), () => this.onReady())
+    else {
+      log('waiting for load...')
+      return runWhen(checkReady(window.document), () => this.onReady())
+    }
   }
 
   /**
@@ -79,12 +101,6 @@ export default class App {
         addScript('installed')
       }
     })
-
-    // load pages if encoded in the URL
-    const urls = parseRootUrl(true)
-    if (urls.length > 1) {
-      this.page?.load(urls)
-    }
   }
 
   // handle clicks on main workflowy page
@@ -101,9 +117,20 @@ export default class App {
     }
   }
 
-  onNavigate () {
-    const data = this.getData()
-    // void this.bus.call('popup:setSession', data.session)
+  // sync frames when the user navigates back / forward
+  onPopState () {
+    const { urls, layout } = parseRootUrl(true)
+
+    // multiflow url; diff-load frames without touching history
+    if (urls.length > 1 && this.page) {
+      this.setSetting('layout', layout || 'fill', false)
+      this.page.load(urls)
+    }
+
+    // plain workflowy url; reload to hand the page back to workflowy
+    else if (getSetting('mode') === 'multiflow') {
+      window.location.reload()
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -114,18 +141,20 @@ export default class App {
     Object.keys(settings).forEach(key => this.setSetting(key, settings[key]))
   }
 
-  setSetting (key: string, value: any) {
+  setSetting (key: string, value: any, updateSession = true) {
     setSetting(key, value)
     if (key === 'layout') {
       this.page!.updateLayout()
+      if (updateSession) {
+        this.page!.updateSession()
+      }
     }
   }
 
-  setUrls (urls: string[]): void {
+  setUrls (urls: string[], push = true): void {
     if (Array.isArray(urls)) {
       setTimeout(() => {
-        this.page!.load(urls)
-        window.location
+        this.page!.load(urls, push)
       }, 100)
     }
   }

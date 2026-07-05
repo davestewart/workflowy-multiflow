@@ -1,8 +1,8 @@
 import { type Bus, makeBus } from 'bus'
-import { log } from '@utils/app'
+import { log, type Session } from '@utils/app'
 import { getSetting, setSetting } from '../helpers/dom'
 import { getTitle } from '../helpers/app.js'
-import { makeWfUrl, WF_WIDTH } from '../helpers/url'
+import { cleanRootUrl, getHash, makeRootUrl, makeWfUrl, WF_WIDTH } from '../helpers/url'
 import Frame, { type FrameData } from './Frame'
 
 /**
@@ -15,6 +15,9 @@ export default class Page {
   public container!: HTMLElement
 
   public bus!: Bus
+
+  // create a history entry (rather than replace) when the loading frames are ready
+  private pendingPush = false
 
   constructor () {
     this.frames = []
@@ -46,7 +49,7 @@ export default class Page {
     })
   }
 
-  load (urls: string[] = []) {
+  load (urls: string[] = [], push = false) {
     // if only one URL, don't use frames
     if (urls.length === 1) {
       window.location.href = urls[0]
@@ -54,6 +57,7 @@ export default class Page {
 
     // update frames
     else {
+      this.pendingPush ||= push
       const max = Math.max(urls.length, this.numVisible)
       for (let i = 0; i < max; i++) {
         const frame = this.frames[i]
@@ -64,7 +68,7 @@ export default class Page {
             : this.addFrame(url)
         }
         else {
-          this.hideFrame(frame)
+          this.hideFrame(frame, false)
         }
       }
     }
@@ -146,25 +150,27 @@ export default class Page {
     }
   }
 
-  hideFrame (frame: Frame): void {
+  hideFrame (frame: Frame, push = true): void {
     if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.frames.push(frame)
       frame.hide()
       this.updateLayout()
+      this.updateSession(push)
     }
     else {
       this.switchMode(false, frame)
     }
   }
 
-  removeFrame (frame: Frame): void {
+  removeFrame (frame: Frame, push = true): void {
     if (this.numVisible > 2) {
       const index = this.getFrameIndex(frame)
       this.frames.splice(index, 1)
       this.container!.removeChild(frame.element!)
       this.updateLayout()
+      this.updateSession(push)
     }
     else {
       this.switchMode(false, frame)
@@ -194,19 +200,24 @@ export default class Page {
     }
   }
 
-  updateSession (): void {
+  /**
+   * Sync the document title and URL with the current frames
+   *
+   * @param push  Create a browser history entry (structural changes: open / close / load
+   *              session) rather than updating the current one (in-frame navigation, layout)
+   */
+  updateSession (push = false): void {
     // title
     const session = this.getSession()
     this.setTitle(session.title)
 
-    // update popup
-    // void this.bus.call('popup:setSession', session)
-
     // update url
-    // const ids = session.id.split('/')
-    // const url = makeRootUrl(ids, location.href)
-    // console.log('url', url)
-    // window.location.replace(url)
+    const path = makeRootUrl(session, true)
+    const changed = location.pathname + location.hash !== path
+    log('updating history:', path)
+    push && changed
+      ? history.pushState(null, '', path)
+      : history.replaceState(null, '', path)
   }
 
   getSession (): Session {
@@ -239,9 +250,10 @@ export default class Page {
   }
 
   getRootData (): FrameData {
+    const url = cleanRootUrl()
     return {
-      url: document.location.href,
-      hash: document.location.hash.substring(2),
+      url: url.toString(),
+      hash: getHash(url),
       title: document.title,
     }
   }
@@ -257,7 +269,7 @@ export default class Page {
       .getVisibleFrames()
       .map(frame => frame.getData())
 
-    // if no frames, add fake ones
+    // if no frames, add fake one
     if (frames.length === 0) {
       frames.push(this.getRootData())
     }
@@ -282,7 +294,8 @@ export default class Page {
     log(`loaded ${numLoaded} of ${frames.length} frames`)
     if (numLoaded === frames.length) {
       this.setLoading(false)
-      this.updateSession()
+      this.updateSession(this.pendingPush)
+      this.pendingPush = false
     }
   }
 

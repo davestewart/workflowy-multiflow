@@ -2,7 +2,7 @@ import { log } from '@utils/app'
 import { isModifier, runWhen } from '@utils/dom'
 import { checkReady, getDoc, addListeners, observeNavigation } from '../helpers/dom'
 import { getTitle } from '../helpers/app'
-import { isWfUrl } from '../helpers/url'
+import { getHash, isWfUrl } from '../helpers/url'
 import Page from '../classes/Page'
 
 export interface FrameData {
@@ -120,7 +120,11 @@ export default class Frame {
   // ---------------------------------------------------------------------------------------------------------------------
 
   load (href: string) {
-    this.window.location.href = href
+    // replace, not assign; frame loads should not create browser history entries
+    const current = this.window.location.href
+    if (!isWfUrl(current) || getHash(current) !== getHash(href)) {
+      this.window.location.replace(href)
+    }
     this.show()
   }
 
@@ -147,10 +151,11 @@ export default class Frame {
 
   getData (): FrameData {
     const doc = getDoc(this.window)!
+    const url = this.window.location.href
     return {
+      url,
+      hash: getHash(url), // .hash.substring(2).replace(/\?.+/, '')
       title: getTitle(doc) || ' LOADING ',
-      hash: this.window.location.hash.substring(2).replace(/\?.+/, ''),
-      url: this.window.location.href,
     }
   }
 

@@ -1,55 +1,132 @@
+import { type Session } from '@utils/app'
+
 export const WF_WIDTH = 700
+
+const ORIGIN = window.location.origin
+const FRAMES = 'f'
+const LAYOUT = 'l'
+
 const rxUrl = /^(https?:\/\/)?(\w+\.)?workflowy.com\b/
 const rxHash = /^\/?#/
 
-const SEP = '%20' // space
-const ORIGIN = window.location.origin
+/**
+ * Test if a URL is a WF URL
+ */
+export function isWfUrl (input: string) {
+  return rxHash.test(input) || rxUrl.test(input)
+}
+
+/**
+ * Get the hash content of a URL
+ */
+export function getHash (url: string) {
+  return new URL(url).hash.replace(/^#\/?/, '')
+}
+
+/**
+ * Decode a URL component, passing malformed input through rather than throwing
+ */
+function tryDecode (value: string) {
+  try {
+    return decodeURIComponent(value)
+  }
+  catch {
+    return value
+  }
+}
+
+/**
+ * Parse the hash / route of a URL into hash, search and params
+ */
+export function parseRoute (url: string) {
+  const { origin, hash } = new URL(url)
+  const [id, search] = hash.split('?')
+  const params = new URLSearchParams(search)
+  return { origin, id: id.replace('#', ''), search, params }
+}
 
 /**
  * Parse MultiFlow URL into WorkFlowy ids or WorkFlowy urls
  *
- * A MultiFlow URL contains 2 ids separated by %20 tokens:
+ * A MultiFlow URL contains a query with frame hashes encoded as a comma-delimited list:
  *
- * https://workflowy.com/#/fa901479206c?ids=fa901479206c%20ed7149b5e538
+ * https://workflowy.com/#?f=fa901479206c,ed7149b5e538&l=nav
  *
  */
 export function parseRootUrl (asUrls = false) {
-  const hash = window.location.hash
-  const matches = hash.replace(/#.*\?/, '').match(/^ids=(.+)/)
-  if (matches) {
-    const [ _all, idsStr ] = matches
-    const ids = idsStr.split(SEP).filter(s => s)
-    return asUrls
-      ? ids.map(id => `https://workflowy.com/#/${id}`)
-      : ids
+  // convert into url params
+  const { params, search } = parseRoute(location.href)
+
+  // frames are read from the raw search, as URLSearchParams' decoding would corrupt
+  // hashes containing encoded delimiter characters before we split on them
+  const raw = (search || '')
+    .split('&')
+    .find(pair => pair.startsWith(FRAMES + '='))
+
+  // grab hashes from frames param
+  const hashes = (raw ? raw.slice(FRAMES.length + 1) : '')
+    .split(',')
+    .filter(Boolean)
+    .map(tryDecode)
+
+  // return
+  return {
+    urls: hashes.map(hash => asUrls ? `${ORIGIN}/#${hash}` : hash),
+    layout: params.get(LAYOUT) as Layout || undefined,
   }
-  return []
 }
 
 /**
- * Serialise ids into a MultiFlow URL
+ * Serialise frame urls into a MultiFlow URL
+ *
+ * @param session
+ * @param pathOnly
  */
-export function makeRootUrl (ids: string[], href: string) {
-  // create URL from
-  const url = new URL(href)
+export function makeRootUrl (session: Session, pathOnly = false) {
+  // settings
+  const { urls, settings } = session
 
-  // ensure there is a hash
-  if (!url.hash) {
-    url.hash = '/'
+  // serialised by hand, as URLSearchParams would percent-encode the comma delimiters;
+  // node hashes are word characters so pass through untouched, but hashes with search
+  // queries (#/abc?q=foo) need escaping to not corrupt the outer query
+  const hashes = urls.map(url => encodeURIComponent(getHash(url)))
+  const parts = [`${FRAMES}=${hashes.join(',')}`]
+
+  // optionally add layout
+  if (settings.layout && settings.layout !== 'fill' && urls.length > 1) {
+    parts.push(`${LAYOUT}=${settings.layout}`)
   }
 
-  // current id
-  const match = url.hash.match(/#\/([^?]+)/)
-  const id = match ? match[1] : `` // ${ids[0]}
+  // return
+  const path = '/#?' + parts.join('&')
+  return pathOnly
+    ? path
+    : ORIGIN + path
+}
 
-  // build query
-  const query = ids.join(SEP)
+/**
+ * Return WorkFlowy root URL without frame parameters
+ */
+export function cleanRootUrl () {
+  // get query
+  const { origin, id, search } = parseRoute(location.href)
 
-  // add query
-  url.hash = `#${id ? `/${id}` : ''}?ids=${query}`
+  // convert to params
+  const params = new URLSearchParams(search)
+  const keys = Array.from(params.keys())
 
-  // return new URL
-  return url.toString()
+  // clean params
+  keys.forEach((key) => {
+    if (key === FRAMES || key === LAYOUT) {
+      params.delete(key)
+    }
+  })
+
+  // convert params to string
+  const newSearch = params.toString()
+
+  // return final cleaned string
+  return origin + '/#' + id + (newSearch ? '?' + newSearch : '')
 }
 
 /**
@@ -77,8 +154,4 @@ export function makeWfUrl (input: string, origin: string = ORIGIN) {
 
   // return url
   return origin + path
-}
-
-export function isWfUrl (input: string) {
-  return rxHash.test(input) || rxUrl.test(input)
 }
