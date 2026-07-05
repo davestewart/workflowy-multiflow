@@ -1,6 +1,6 @@
-import { log, Session } from '@utils/app'
+import { log, type Session, type Layout } from '@utils/app'
 import { runWhen } from '@utils/dom'
-import { addListeners, addScript, checkReady, getSetting, observeNavigation, setSetting } from '../helpers/dom'
+import { addListeners, addScript, checkReady, getSetting, setSetting } from '../helpers/dom'
 import { makeWfUrl, parseRootUrl } from '../helpers/url'
 import Page from './Page'
 import { Bus, makeBus } from 'bus'
@@ -31,20 +31,28 @@ export default class App {
     })
 
     // parse url before WF gets a chance to modify it
-    const urls = parseRootUrl(true)
+    const { urls, layout } = parseRootUrl(true)
 
-    // eslint-disable-next-line no-void
-    void runWhen(
-      () => document.getElementById('loadingScreen')?.style.display === 'none',
-      () => this.init(urls),
-    )
+    // if we have URLs, immediately load frames
+    if (urls.length) {
+      void this.init(urls, layout)
+    }
+
+    // otherwise, load normally
+    else {
+      // eslint-disable-next-line no-void
+      void runWhen(
+        () => document.getElementById('loadingScreen')?.style.display === 'none',
+        () => this.init(urls, layout)
+      , 250)
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  async init (urls: string[]) {
+  async init (urls: string[], layout?: Layout | undefined) {
     // page
     log('updating page structure')
     this.page = new Page()
@@ -54,12 +62,20 @@ export default class App {
     log('loading settings')
     setSetting('mode', 'workflowy')
 
-    // navigation
-    // observeNavigation(window, this.onNavigate.bind(this))
+    // load pages if encoded in the URL
+    if (urls.length > 1) {
+      log('loading frames')
+      this.setUrls(urls)
+      if (layout) {
+        this.setSetting('layout', layout, false)
+      }
+    }
 
     // wait for ready...
-    log('waiting for load...')
-    return runWhen(checkReady(window.document), () => this.onReady(urls))
+    else {
+      log('waiting for load...')
+      return runWhen(checkReady(window.document), () => this.onReady())
+    }
   }
 
   /**
@@ -69,7 +85,7 @@ export default class App {
    *
    * window?.feature('open_links_in_desktop')
    */
-  onReady (urls: string[]) {
+  onReady () {
     // ready
     log('page ready!')
     addListeners(window, this.onItemClick.bind(this))
@@ -82,11 +98,6 @@ export default class App {
         addScript('installed')
       }
     })
-
-    // load pages if encoded in the URL
-    if (urls.length > 1) {
-      this.page?.load(urls)
-    }
   }
 
   // handle clicks on main workflowy page
@@ -116,10 +127,13 @@ export default class App {
     Object.keys(settings).forEach(key => this.setSetting(key, settings[key]))
   }
 
-  setSetting (key: string, value: any) {
+  setSetting (key: string, value: any, updateSession = true) {
     setSetting(key, value)
     if (key === 'layout') {
       this.page!.updateLayout()
+      if (updateSession) {
+        this.page!.updateSession()
+      }
     }
   }
 

@@ -1,3 +1,5 @@
+import { type Session } from '@utils/app'
+
 export const WF_WIDTH = 700
 
 const ORIGIN = window.location.origin
@@ -45,8 +47,8 @@ export function parseRootUrl (asUrls = false) {
   // grab keys and values from params object
   const entries = Array.from(params.entries())
 
-  // process and extract frame ids
-  return entries.reduce((urls, [key, value]) => {
+  // grab urls
+  const urls = entries.reduce((urls, [key, value]) => {
     if (key.startsWith(PREFIX)) {
       urls.push(asUrls
         ? `${ORIGIN}/#${value}`
@@ -54,15 +56,24 @@ export function parseRootUrl (asUrls = false) {
     }
     return urls
   }, [] as string[])
+
+  // return
+  return {
+    urls,
+    layout: params.get('layout') as Layout || undefined,
+  }
 }
 
 /**
  * Serialise frame urls into a MultiFlow URL
  *
- * @param urls
+ * @param session
  * @param pathOnly
  */
-export function makeRootUrl (urls: string[], pathOnly = false) {
+export function makeRootUrl (session: Session, pathOnly = false) {
+  // settings
+  const { urls, settings } = session
+
   // convert array of frame urls to object of url hashes
   const obj = urls.reduce((params, value, index) => {
     params[`${PREFIX}${index + 1}`] = getHash(value)
@@ -71,6 +82,11 @@ export function makeRootUrl (urls: string[], pathOnly = false) {
 
   // convert object to url params
   const params = new URLSearchParams(obj)
+
+  // optionally add layout
+  if (settings.layout && settings.layout !== 'fill' && urls.length > 1) {
+    params.set('layout', settings.layout)
+  }
 
   // generate full url
   const url = new URL(ORIGIN)

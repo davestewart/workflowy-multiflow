@@ -2,14 +2,13 @@ import { storage } from './storage.js'
 
 export type Layout = 'hug' | 'fill' | 'nav' // | 'custom'
 
+export type Setting = 'layout' | string
+
 export interface Session {
   id: string
   title: string
-  settings: {
-    [key: string]: any
-    layout: Layout
-  }
   urls: string[]
+  settings: Record<Setting, any>
 }
 
 export const Sessions = {
@@ -23,7 +22,7 @@ export const Sessions = {
 }
 
 export function log (message: string, ...values: any[]) {
-  console.log('MultiFlow: ' + message, ...values)
+  console.log('[MultiFlow]: ' + message, ...values)
 }
 
 export function clone (value: any) {

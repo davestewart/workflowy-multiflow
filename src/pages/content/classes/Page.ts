@@ -1,5 +1,5 @@
 import { type Bus, makeBus } from 'bus'
-import { log } from '@utils/app'
+import { log, type Session } from '@utils/app'
 import { getSetting, setSetting } from '../helpers/dom'
 import { getTitle } from '../helpers/app.js'
 import { cleanRootUrl, getHash, makeRootUrl, makeWfUrl, WF_WIDTH } from '../helpers/url'
@@ -28,7 +28,7 @@ export default class Page {
   // setup
   // -------------------------------------------------------------------------------------------------------------------
 
-  init () {
+  async init () {
     // multiflow
     const multiflow = document.createElement('div')
     multiflow.setAttribute('id', 'multiflow')
@@ -44,6 +44,13 @@ export default class Page {
 
       }
     })
+
+    // reload
+    const tabId = await this.bus.call('background:getTabId')
+    window.addEventListener('beforeunload', async (event) => {
+      const session = this.getSession()
+      localStorage.setItem('session', JSON.stringify({ tabId, session }));
+    });
   }
 
   load (urls: string[] = []) {
@@ -200,13 +207,12 @@ export default class Page {
     // title
     const session = this.getSession()
     this.setTitle(session.title)
+    console.log(session.title)
 
     // update url
-    const path = makeRootUrl(session.urls, true)
+    const path = makeRootUrl(session, true)
+    log('updating history:', path)
     history.replaceState(null, '', path)
-
-    // update popup
-    // void this.bus.call('popup:setSession', session)
   }
 
   getSession (): Session {
