@@ -117,237 +117,212 @@
   </main>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { isEqual } from 'lodash'
-import { toRaw } from 'vue'
+import { computed, nextTick, ref, toRaw, watch } from 'vue'
 import { makeBus } from 'bus'
-import { SlickItem, SlickList } from 'vue-slicksort'
-import { clone, Layout, Session, Sessions } from '@utils/app'
+import { SlickList } from 'vue-slicksort'
+import { clone, type Layout, type Session, Sessions } from '@utils/app'
 
-export default {
-  components: {
-    SlickList,
-    SlickItem,
+// ---------------------------------------------------------------------------------------------------------------------
+// state
+// ---------------------------------------------------------------------------------------------------------------------
+
+// the session data of the page
+const session = ref<Session>({
+  id: '0',
+  title: '',
+  urls: [],
+  settings: {
+    layout: 'fill',
   },
+})
 
-  data () {
-    return {
-      // the session data of the page
-      session: <Session>{
-        id: '0',
-        title: '',
-        urls: [] as string[],
-        settings: {
-          layout: 'fill',
-        },
-      },
+// the sessions saved in local storage
+const sessions = ref<Session[]>([])
 
-      // the sessions saved in local storage
-      sessions: [] as Session[],
+const loading = ref(false)
 
-      loading: false,
+const sorting = ref(false)
 
-      updating: false,
+const error = ref(false)
 
-      sorting: false,
+const options = {
+  layout: {
+    fill: 'Fill',
+    hug: 'Hug',
+    nav: 'Nav',
+    // custom: 'Custom'
+  } as Record<Layout, string>,
+}
 
-      error: false,
-    }
+const version = chrome.runtime.getManifest
+  ? chrome.runtime.getManifest().version
+  : ''
+
+// ---------------------------------------------------------------------------------------------------------------------
+// computed
+// ---------------------------------------------------------------------------------------------------------------------
+
+// the saved session that matches the id of the page session
+const savedSession = computed<Session | undefined>(() => {
+  return Array.isArray(sessions.value)
+    ? sessions.value.find(saved => session.value && session.value.id === saved.id)
+    : undefined
+})
+
+const isSessionChanged = computed(() => {
+  if (savedSession.value && session.value.id === savedSession.value.id) {
+    return !isEqual(clone(session.value), clone(savedSession.value))
+  }
+  return false
+})
+
+const saveAction = computed<'save' | 'update' | 'none'>(() => {
+  return savedSession.value
+    ? isSessionChanged.value
+      ? 'update'
+      : 'none'
+    : 'save'
+})
+
+const saveText = computed(() => {
+  const text = {
+    save: 'Save new session...',
+    update: 'Update session',
+    none: 'No changes',
+  }
+  return text[saveAction.value]
+})
+
+// ---------------------------------------------------------------------------------------------------------------------
+// setup
+// ---------------------------------------------------------------------------------------------------------------------
+
+const bus = makeBus('popup', {
+  target: 'background',
+  handlers: {
+    setLoading,
+    setSession,
   },
+})
 
-  computed: {
-    bus () {
-      return makeBus('popup', {
-        target: 'background',
-        handlers: {
-          setLoading: this.setLoading.bind(this),
-          setSession: this.setSession.bind(this)
-        },
+void init()
+
+async function init () {
+  // get sessions
+  sessions.value = await Sessions.get()
+
+  // watch settings changes
+  Object.keys(session.value.settings).forEach((key) => {
+    watch(() => session.value.settings[key], value => setSetting(key, value))
+  })
+
+  // get page data
+  void getData()
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// data
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Loads current session and layout data
+ */
+async function getData () {
+  const data = await bus.callTab(true, 'getData')
+  if (data) {
+    session.value = data.session
+    const saved = sessions.value.find(saved => saved.id === data.session.id)
+    if (saved) {
+      void nextTick(() => {
+        session.value.title = saved.title
       })
-    },
+    }
+    if (data.session.urls.length === 1) {
+      session.value.settings.layout = 'fill'
+      void setSetting('layout', 'fill')
+    }
+  }
+  else {
+    error.value = true
+  }
+}
 
-    options () {
-      const layout: Record<Layout, string> = {
-        fill: 'Fill',
-        hug: 'Hug',
-        nav: 'Nav',
-        // custom: 'Custom'
-      }
-      return {
-        layout
-      }
-    },
+function setSession (value: Session): void {
+  if (value.id !== savedSession.value?.id) {
+    session.value = value
+  }
+}
 
-    version (): string {
-      return chrome.runtime.getManifest
-        ? chrome.runtime.getManifest().version
-        : ''
-    },
+// ---------------------------------------------------------------------------------------------------------------------
+// sessions
+// ---------------------------------------------------------------------------------------------------------------------
 
-    // the saved session that matches the id of the page session
-    savedSession (): Session | void {
-      return Array.isArray(this.sessions)
-        ? this.sessions.find(session => this.session && this.session.id === session.id)!
-        : undefined
-    },
+async function saveSession () {
+  // variables
+  const value = clone(toRaw(session.value))
 
-    isSessionChanged () {
-      if (this.savedSession) {
-        if (this.session.id === this.savedSession.id) {
-          return !isEqual(clone(this.session), clone(this.savedSession))
-        }
-      }
-      return false
-    },
+  // update
+  if (saveAction.value === 'update') {
+    const index = sessions.value.findIndex(saved => saved.id === value.id)
+    if (index > -1) {
+      sessions.value[index] = value
+    }
+  }
 
-    saveAction () {
-      return this.savedSession
-        ? this.isSessionChanged
-          ? 'update'
-          : 'none'
-        : 'save'
-    },
+  // save
+  else {
+    sessions.value.push(value)
+  }
 
-    saveText () {
-      const text = {
-        save: 'Save new session...',
-        update: 'Update session',
-        none: 'No changes',
-      }
-      return text[this.saveAction]
-      }
-  },
+  // save
+  void storeSessions()
+}
 
-  async created () {
-    // get sessions
-    this.sessions = await Sessions.get()
+async function loadSession (index: number) {
+  const value = toRaw(sessions.value[index])
+  if (session.value.id !== value.id) {
+    loading.value = true
+    Object.assign(session.value, clone(value))
+    await bus.callTab(true, 'setSession', value)
+  }
+}
 
-    // watch settings changes
-    Object.keys(this.session.settings).forEach(key => {
-      this.$watch(`session.settings.${key}`, value => this.setSetting(key, value))
-    })
+async function removeSession (index: number) {
+  sessions.value.splice(index, 1)
+  void storeSessions()
+}
 
-    // get page data
-    void this.getData()
-  },
+async function storeSessions () {
+  void Sessions.set(clone(sessions.value))
+}
 
-  methods: {
-    // -----------------------------------------------------------------------------------------------------------------
-    // data
-    // -----------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+// settings
+// ---------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Loads current session and layout data
-     */
-    async getData () {
-      const data = await this.bus.callTab(true, 'getData')
-      console.log(data)
-      if (data) {
-        this.session = data.session
-        const session = this.sessions.find(session => session.id === data.session.id)
-        if (session) {
-          void this.$nextTick(() => {
-            this.session.title = session.title
-          })
-        }
-        if (data.session.urls.length === 1) {
-          this.session.settings.layout = 'fill'
-          void this.setSetting('layout', 'fill')
-        }
-      }
-      else {
-        this.error = true
-      }
-    },
+function setLoading (value: boolean) {
+  loading.value = value
+}
 
-    setSession (session: Session): void {
-      if (session.id !== this.savedSession?.id) {
-        this.session = session
-      }
-    },
+function setSetting (key: string, value: any) {
+  return bus.callTab(true, 'setSetting', { key, value })
+}
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // sessions
-    // -----------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+// utilities
+// ---------------------------------------------------------------------------------------------------------------------
 
-    async saveSession () {
-      // variables
-      const session = clone(toRaw(this.session))
+function onSortStart () {
+  sorting.value = true
+}
 
-      // update
-      if (this.saveAction === 'update') {
-        const index = this.sessions.findIndex(s => s.id === session.id)
-        if (index > -1) {
-          this.sessions[index] = session
-        }
-      }
+function onSortEnd () {
+  sorting.value = false
+}
 
-      // save
-      else {
-        this.sessions.push(session)
-      }
-
-      // save
-      void this.storeSessions()
-    },
-
-    async loadSession (index: number) {
-      const session = toRaw(this.sessions[index])
-      if (this.session.id !== session.id) {
-        this.loading = true
-        Object.assign(this.session, clone(session))
-        await this.bus.callTab(true, 'setSession', session)
-      }
-    },
-
-    async removeSession (index: number) {
-      this.sessions.splice(index, 1)
-      void this.storeSessions()
-    },
-
-    async storeSessions () {
-      const sessions = clone(this.sessions)
-      void Sessions.set(sessions)
-    },
-
-    // ---------------------------------------------------------------------------------------------------------------------
-    // settings
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    setLoading (value: boolean) {
-      this.loading = value
-    },
-
-    setUpdating (value: boolean) {
-      if (value) {
-        this.updating = true
-      }
-      else {
-        void this.$nextTick(() => {
-          this.updating = false
-        })
-      }
-    },
-
-    setSetting (key: string, value: string) {
-      return this.bus.callTab(true, 'setSetting', { key, value })
-    },
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // utilities
-    // -----------------------------------------------------------------------------------------------------------------
-
-    onSortStart () {
-      this.sorting = true
-    },
-
-    onSortEnd () {
-      this.sorting = false
-    },
-
-    onSortInput () {
-      this.storeSessions()
-    },
-  },
+function onSortInput () {
+  void storeSessions()
 }
 </script>
