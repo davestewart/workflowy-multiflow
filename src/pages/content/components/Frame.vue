@@ -91,10 +91,20 @@ watch(() => props.frame.command, (command) => {
 
 function load (href: string) {
   // replace, not assign; frame loads should not create browser history entries
-  const current = getWindow().location.href
-  if (!isWfUrl(current) || getHash(current) !== getHash(href)) {
+  const win = getWindow()
+  const current = win.location.href
+  if (isWfUrl(current) && getHash(current) === getHash(href)) {
+    return
+  }
+  if (isWfUrl(current)) {
+    // WF to WF only changes the hash, which is a same-document navigation:
+    // no load event will fire, so report the new url directly
+    win.location.replace(href)
+    store.onFrameNavigated(props.frame.id, getData())
+  }
+  else {
     store.onFrameLoadStart(props.frame.id)
-    getWindow().location.replace(href)
+    win.location.replace(href)
   }
 }
 
