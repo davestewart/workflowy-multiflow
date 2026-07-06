@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createIntegratedUi } from 'wxt/client'
 import { makeBus } from 'bus'
 import { log, type Session } from '@utils/app'
 import { runWhen } from '@utils/dom'
@@ -14,7 +15,7 @@ export default defineContentScript({
     'https://workflowy.com/*',
     'https://*.workflowy.com/*'
   ],
-  main () {
+  main (ctx) {
     log('running!')
     if (window !== window.top) {
       return
@@ -24,11 +25,22 @@ export default defineContentScript({
     const { urls, layout } = parseRootUrl(true)
 
     // mount the app; inert (display: none) until frames are added
+    // createIntegratedUi wires ctx so WXT can invalidate and re-inject without a full page reload
     log('updating page structure')
-    const root = document.createElement('div')
-    root.setAttribute('id', 'multiflow')
-    document.body.appendChild(root)
-    createApp(App).mount(root)
+    const ui = createIntegratedUi(ctx, {
+      position: 'inline',
+      anchor: 'body',
+      onMount (container) {
+        container.id = 'multiflow'
+        const app = createApp(App)
+        app.mount(container)
+        return app
+      },
+      onRemove (app) {
+        app?.unmount()
+      },
+    })
+    ui.mount()
 
     // popup messaging
     const bus = makeBus('content', {
@@ -90,7 +102,15 @@ export default defineContentScript({
     // handle modifier-clicks on the main workflowy page
     function onItemClick (url: string, hasModifier: boolean) {
       if (hasModifier) {
-        store.openUrls([makeWfUrl(window.location.href), url])
+        if (store.mode.value === 'multiflow') {
+          // window.location.href is the multiflow URL in this mode, not a WF node URL;
+          // open the clicked link in the next frame instead
+          const focused = store.state.frames[store.state.focused]
+          if (focused) store.openInNextFrame(focused.id, url)
+        }
+        else {
+          store.openUrls([makeWfUrl(window.location.href), url])
+        }
       }
       else {
         window.location.href = url

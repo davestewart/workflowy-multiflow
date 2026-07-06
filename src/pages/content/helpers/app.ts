@@ -1,4 +1,4 @@
-import { storage } from '@utils/storage'
+import { Storage } from '@utils/storage'
 
 export function getTitle <T extends { title: string }>(frame: T | T[]): string {
   if (Array.isArray(frame)) {
@@ -16,9 +16,9 @@ export function getTitle <T extends { title: string }>(frame: T | T[]): string {
 
 export async function checkInstall () {
   const key = 'installed'
-  const installed = await storage.get(key)
+  const installed = await Storage.get(key)
   if (!installed) {
-    await storage.set(key, 1)
+    await Storage.set(key, 1)
   }
   return installed
 }

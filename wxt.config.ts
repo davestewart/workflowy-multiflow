@@ -1,5 +1,4 @@
 import { defineConfig } from 'wxt'
-import vue from '@vitejs/plugin-vue'
 
 function toArray<T> (value: T | T[]): T[] {
   return Array.isArray(value)
@@ -21,6 +20,7 @@ const hostPermissions = [
 ]
 
 export default defineConfig({
+  modules: ['@wxt-dev/module-vue'],
   // folders
   outDir: 'dist',
   srcDir: 'src',
@@ -80,7 +80,4 @@ export default defineConfig({
     },
   },
 
-  vite: () => ({
-    plugins: [vue()],
-  }),
 })

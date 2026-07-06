@@ -1,4 +1,4 @@
-import { storage } from './storage.js'
+import { Storage } from './storage'
 
 export type Layout = 'hug' | 'fill' | 'nav' // | 'custom'
 
@@ -13,16 +13,16 @@ export interface Session {
 
 export const Sessions = {
   async get (): Promise<Session[]> {
-    return storage.get('sessions', [])
+    return Storage.get('sessions', [])
   },
 
   async set (value: Session[]) {
-    void storage.set('sessions', value)
+    void Storage.set('sessions', value)
   },
 }
 
 export function log (message: string, ...values: any[]) {
-  console.log('[MultiFlow]: ' + message, ...values)
+  console.log('[MultiFlow] ' + message, ...values)
 }
 
 export function clone (value: any) {

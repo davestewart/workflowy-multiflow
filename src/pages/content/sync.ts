@@ -1,6 +1,5 @@
 import { watch } from 'vue'
 import { type Bus } from 'bus'
-import { log } from '@utils/app'
 import { setSetting } from './helpers/dom'
 import { makeRootUrl, parseRootUrl } from './helpers/url'
 import { loading, mode, openUrls, session, setLayout, state, visibleFrames } from './store'
@@ -61,7 +60,7 @@ function syncSession (): void {
   // update url
   const path = makeRootUrl(value, true)
   const changed = location.pathname + location.hash !== path
-  log('updating history:', path)
+  // log('updating history:', path)
   state.pendingPush && changed
     ? history.pushState(null, '', path)
     : history.replaceState(null, '', path)
