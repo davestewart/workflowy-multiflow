@@ -8,6 +8,7 @@ const LAYOUT = 'l'
 
 const rxUrl = /^(https?:\/\/)?(\w+\.)?workflowy.com\b/
 const rxHash = /^\/?#/
+const rxFrame = new RegExp(`^${FRAMES}\\d+$`)
 
 /**
  * Test if a URL is a WF URL
@@ -48,26 +49,30 @@ export function parseRoute (url: string) {
 /**
  * Parse MultiFlow URL into WorkFlowy ids or WorkFlowy urls
  *
- * A MultiFlow URL contains a query with frame hashes encoded as a comma-delimited list:
+ * A MultiFlow URL carries one indexed query param per frame, so each hash is a
+ * standalone value that URLSearchParams round-trips without any delimiter:
  *
- * https://workflowy.com/#?f=fa901479206c,ed7149b5e538&l=nav
+ * https://workflowy.com/#?f1=fa901479206c&f2=ed7149b5e538&l=nav
  *
  */
 export function parseRootUrl (asUrls = false) {
   // convert into url params
-  const { params, search } = parseRoute(location.href)
+  const { params } = parseRoute(location.href)
 
-  // frames are read from the raw search, as URLSearchParams' decoding would corrupt
-  // hashes containing encoded delimiter characters before we split on them
-  const raw = (search || '')
-    .split('&')
-    .find(pair => pair.startsWith(FRAMES + '='))
-
-  // grab hashes from frames param
-  const hashes = (raw ? raw.slice(FRAMES.length + 1) : '')
-    .split(',')
+  // grab hashes from indexed frame params, ordered by their numeric suffix
+  let hashes = Array.from(params.keys())
+    .filter(key => rxFrame.test(key))
+    .sort((a, b) => Number(a.slice(FRAMES.length)) - Number(b.slice(FRAMES.length)))
+    .map(key => params.get(key)!)
     .filter(Boolean)
-    .map(tryDecode)
+
+  // legacy fallback: single comma-delimited f= param
+  if (hashes.length === 0 && params.has(FRAMES)) {
+    hashes = (params.get(FRAMES) || '')
+      .split(',')
+      .filter(Boolean)
+      .map(tryDecode)
+  }
 
   // return
   return {
@@ -86,19 +91,18 @@ export function makeRootUrl (session: Session, pathOnly = false) {
   // settings
   const { urls, settings } = session
 
-  // serialised by hand, as URLSearchParams would percent-encode the comma delimiters;
-  // node hashes are word characters so pass through untouched, but hashes with search
-  // queries (#/abc?q=foo) need escaping to not corrupt the outer query
-  const hashes = urls.map(url => encodeURIComponent(getHash(url)))
-  const parts = [`${FRAMES}=${hashes.join(',')}`]
+  // one indexed param per frame; URLSearchParams encodes each hash correctly,
+  // including hashes carrying a search query (#/abc?q=foo)
+  const params = new URLSearchParams()
+  urls.forEach((url, index) => params.set(`${FRAMES}${index + 1}`, getHash(url)))
 
   // optionally add layout
   if (settings.layout && settings.layout !== 'fill' && urls.length > 1) {
-    parts.push(`${LAYOUT}=${settings.layout}`)
+    params.set(LAYOUT, settings.layout)
   }
 
   // return
-  const path = '/#?' + parts.join('&')
+  const path = '/#?' + params.toString()
   return pathOnly
     ? path
     : ORIGIN + path
