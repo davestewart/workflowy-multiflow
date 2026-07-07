@@ -21,10 +21,10 @@ const hostPermissions = [
 
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
+
   // folders
-  outDir: 'dist',
   srcDir: 'src',
-  entrypointsDir: 'pages',
+  outDir: 'dist',
 
   // manifest
   manifest: {
