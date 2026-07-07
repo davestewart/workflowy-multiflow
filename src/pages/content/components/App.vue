@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { WF_WIDTH } from '../helpers/url'
-import { state, visibleFrames } from '../store'
+import { state, visibleFrames } from '../services/frame'
 import Frame from './Frame.vue'
 
 // hug layout sizes the container to its frames; other layouts fill the viewport

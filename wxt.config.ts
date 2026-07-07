@@ -59,6 +59,7 @@ export default defineConfig({
   // build
   alias: {
     '@utils': './src/utils',
+    '@composables': './src/composables',
   },
 
   runner: {

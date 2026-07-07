@@ -1,7 +1,8 @@
 import { makeBus } from 'bus'
-import { log, Session, Sessions } from '@utils/app'
-import { checkInstall } from '@/pages/content/helpers/app'
 import { browser } from 'wxt/browser'
+import { Storage } from '@utils/storage'
+import { log } from '@utils/app'
+import { type Session, Sessions } from '@composables/useSessions'
 
 /**
  * Background script
@@ -63,7 +64,12 @@ export default defineBackground(() => {
       },
 
       async checkInstall () {
-        return checkInstall()
+        const key = 'installed'
+        const installed = await Storage.get(key)
+        if (!installed) {
+          await Storage.set(key, 1)
+        }
+        return installed
       }
     }
   })

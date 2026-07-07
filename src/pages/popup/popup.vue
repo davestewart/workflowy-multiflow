@@ -60,14 +60,14 @@
           <!-- save -->
           <div class="form-group form-inline">
             <button class="sessionAction__button btn btn-block btn-sm"
-                    :disabled="saveAction === 'none'"
+                    :disabled="sessions.saveAction === 'none'"
                     @click.prevent="saveSession">{{ saveText }}</button>
           </div>
         </div>
       </div>
 
       <!-- sessions -->
-      <div v-if="sessions.length" class="form-group sessions">
+      <div v-if="sessions.data.length" class="form-group sessions">
         <div class="col-3">
           <label class="form-label">Sessions</label>
         </div>
@@ -76,7 +76,7 @@
             <SlickList lock-axis="y"
                        :distance="1"
                        :lock-offset="['0%', '0%']"
-                       v-model:list="sessions"
+                       v-model:list="sessions.data"
                        item-key="id"
                        @sort-start="onSortStart"
                        @sort-end="onSortEnd"
@@ -118,11 +118,11 @@
 </template>
 
 <script setup lang="ts">
-import { isEqual } from 'lodash'
 import { computed, nextTick, ref, toRaw, watch } from 'vue'
 import { makeBus } from 'bus'
 import { SlickList } from 'vue-slicksort'
-import { clone, type Layout, type Session, Sessions } from '@utils/app'
+import { clone } from '@utils/app'
+import { Layout, Session, useSessions } from '@composables/useSessions'
 
 // ---------------------------------------------------------------------------------------------------------------------
 // state
@@ -138,8 +138,8 @@ const session = ref<Session>({
   },
 })
 
-// the sessions saved in local storage
-const sessions = ref<Session[]>([])
+// saved-session store: list + crud + save-state, compared against the current session
+const sessions = useSessions(session)
 
 const loading = ref(false)
 
@@ -164,35 +164,13 @@ const version = chrome.runtime.getManifest
 // computed
 // ---------------------------------------------------------------------------------------------------------------------
 
-// the saved session that matches the id of the page session
-const savedSession = computed<Session | undefined>(() => {
-  return Array.isArray(sessions.value)
-    ? sessions.value.find(saved => session.value && session.value.id === saved.id)
-    : undefined
-})
-
-const isSessionChanged = computed(() => {
-  if (savedSession.value && session.value.id === savedSession.value.id) {
-    return !isEqual(clone(session.value), clone(savedSession.value))
-  }
-  return false
-})
-
-const saveAction = computed<'save' | 'update' | 'none'>(() => {
-  return savedSession.value
-    ? isSessionChanged.value
-      ? 'update'
-      : 'none'
-    : 'save'
-})
-
 const saveText = computed(() => {
   const text = {
     save: 'Save new session...',
     update: 'Update session',
     none: 'No changes',
   }
-  return text[saveAction.value]
+  return text[sessions.saveAction]
 })
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -211,7 +189,7 @@ void init()
 
 async function init () {
   // get sessions
-  sessions.value = await Sessions.get()
+  await sessions.load()
 
   // watch settings changes
   Object.keys(session.value.settings).forEach((key) => {
@@ -233,10 +211,10 @@ async function getData () {
   const data = await bus.callTab(true, 'getData')
   if (data) {
     session.value = data.session
-    const saved = sessions.value.find(saved => saved.id === data.session.id)
-    if (saved) {
+    const match = sessions.find(data.session.id)
+    if (match) {
       void nextTick(() => {
-        session.value.title = saved.title
+        session.value.title = match.title
       })
     }
     if (data.session.urls.length === 1) {
@@ -250,7 +228,7 @@ async function getData () {
 }
 
 function setSession (value: Session): void {
-  if (value.id !== savedSession.value?.id) {
+  if (value.id !== sessions.saved?.id) {
     session.value = value
   }
 }
@@ -259,29 +237,12 @@ function setSession (value: Session): void {
 // sessions
 // ---------------------------------------------------------------------------------------------------------------------
 
-async function saveSession () {
-  // variables
-  const value = clone(toRaw(session.value))
-
-  // update
-  if (saveAction.value === 'update') {
-    const index = sessions.value.findIndex(saved => saved.id === value.id)
-    if (index > -1) {
-      sessions.value[index] = value
-    }
-  }
-
-  // save
-  else {
-    sessions.value.push(value)
-  }
-
-  // save
-  void storeSessions()
+function saveSession () {
+  sessions.save(session.value)
 }
 
 async function loadSession (index: number) {
-  const value = toRaw(sessions.value[index])
+  const value = toRaw(sessions.data[index])
   if (session.value.id !== value.id) {
     loading.value = true
     Object.assign(session.value, clone(value))
@@ -289,13 +250,8 @@ async function loadSession (index: number) {
   }
 }
 
-async function removeSession (index: number) {
-  sessions.value.splice(index, 1)
-  void storeSessions()
-}
-
-async function storeSessions () {
-  void Sessions.set(clone(sessions.value))
+function removeSession (index: number) {
+  sessions.remove(index)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -323,6 +279,6 @@ function onSortEnd () {
 }
 
 function onSortInput () {
-  void storeSessions()
+  sessions.persist()
 }
 </script>

@@ -1,14 +1,16 @@
 import { createApp } from 'vue'
 import { createIntegratedUi } from 'wxt/client'
 import { makeBus } from 'bus'
-import { log, type Session } from '@utils/app'
+import { log } from '@utils/app'
 import { runWhen } from '@utils/dom'
+import { makeWfUrl } from '@utils/url'
 import { addListeners, addScript, checkReady } from './helpers/dom'
-import { makeWfUrl, parseRootUrl } from './helpers/url'
-import * as store from './store'
-import { startSync } from './sync'
+import { parseRootUrl } from './helpers/url'
+import * as store from './services/frame'
+import { startSync } from './services/sync'
 import App from './components/App.vue'
 import './content.scss'
+import { Session } from '@composables/useSessions'
 
 export default defineContentScript({
   matches: [
@@ -109,7 +111,7 @@ export default defineContentScript({
           if (focused) store.openInNextFrame(focused.id, url)
         }
         else {
-          store.openUrls([makeWfUrl(window.location.href), url])
+          store.openUrls([makeWfUrl(window.location.href, location.origin), url])
         }
       }
       else {

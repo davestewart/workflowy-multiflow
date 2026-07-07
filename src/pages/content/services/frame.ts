@@ -1,8 +1,10 @@
 import { computed, reactive } from 'vue'
-import { log, type Session } from '@utils/app'
-import { getTitle } from './helpers/app'
-import { setSetting as setBodySetting } from './helpers/dom'
-import { cleanRootUrl, getHash, makeWfUrl } from './helpers/url'
+import { log } from '@utils/app'
+import { getHash, makeWfUrl } from '@utils/url'
+import { setSetting as setBodySetting } from '../helpers/dom'
+import { buildSession } from './session'
+import { cleanRootUrl } from '../helpers/url'
+import { Session } from '@composables/useSessions'
 
 /**
  * Live data read from a frame's window
@@ -37,6 +39,8 @@ export interface FrameState {
 let uid = 0
 let seq = 0
 
+const ORIGIN = window.location.origin
+
 // ---------------------------------------------------------------------------------------------------------------------
 // state
 // ---------------------------------------------------------------------------------------------------------------------
@@ -67,7 +71,7 @@ export const session = computed<Session>(() => buildSession(visibleFrames.value.
   url: frame.url,
   hash: getHash(frame.url),
   title: frame.title,
-}))))
+})), { layout: state.layout }, ORIGIN))
 
 /**
  * Live frame data accessors, registered by mounted Frame components
@@ -80,17 +84,6 @@ export const registry = new Map<number, () => FrameData>()
 // ---------------------------------------------------------------------------------------------------------------------
 // session
 // ---------------------------------------------------------------------------------------------------------------------
-
-function buildSession (frames: FrameData[]): Session {
-  return {
-    id: frames.map(frame => frame.hash).join('/'),
-    title: getTitle(frames),
-    urls: frames.map(frame => makeWfUrl(frame.url)),
-    settings: {
-      layout: state.layout,
-    },
-  }
-}
 
 /**
  * Build the session from live frame reads (or root page data when not in multiflow mode)
@@ -108,7 +101,7 @@ export function getSession (): Session {
   if (frames.length === 0) {
     frames.push(getRootData())
   }
-  return buildSession(frames)
+  return buildSession(frames, { layout: state.layout }, ORIGIN)
 }
 
 function getRootData (): FrameData {
@@ -187,7 +180,7 @@ export function closeFrame (id: number, remove = false): void {
     const other = visibleFrames.value.find(frame => frame.id !== id)
     if (other) {
       const url = registry.get(other.id)?.().url ?? other.url
-      window.location.href = makeWfUrl(url)
+      window.location.href = makeWfUrl(url, ORIGIN)
     }
   }
 }

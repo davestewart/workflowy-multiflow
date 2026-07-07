@@ -4,13 +4,13 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { getTitle } from '../services/session'
 import { log } from '@utils/app'
 import { isModifier, runWhen } from '@utils/dom'
 import { addListeners, checkReady, getDoc, observeNavigation } from '../helpers/dom'
-import { getHash, isWfUrl } from '../helpers/url'
-import { getTitle } from '../helpers/app'
-import * as store from '../store'
-import type { FrameData, FrameState } from '../store'
+import { getHash, isWfUrl } from '@utils/url'
+import * as store from '../services/frame'
+import type { FrameData, FrameState } from '../services/frame'
 
 const props = defineProps<{
   frame: FrameState

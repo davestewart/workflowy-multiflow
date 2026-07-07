@@ -1,8 +1,8 @@
 import { watch } from 'vue'
 import { type Bus } from 'bus'
-import { setSetting } from './helpers/dom'
-import { makeRootUrl, parseRootUrl } from './helpers/url'
-import { loading, mode, openUrls, session, setLayout, state, visibleFrames } from './store'
+import { setSetting } from '../helpers/dom'
+import { makeRootUrl, parseRootUrl } from '../helpers/url'
+import { loading, mode, openUrls, session, setLayout, state, visibleFrames } from './frame'
 
 /**
  * Central store side effects: body data-* attributes (the interop and CSS
