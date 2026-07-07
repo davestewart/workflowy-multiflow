@@ -1,6 +1,6 @@
 import { parseRoute } from '@utils/url'
 import { decodeSession, encodeSession, FRAMES, LAYOUT } from '../services/session'
-import { Session } from '@composables/useSessions'
+import type { Session } from '@utils/session'
 
 /**
  * Content-only URL helpers: bound to this page's live `location` and origin.

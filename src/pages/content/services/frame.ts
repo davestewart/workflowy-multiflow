@@ -4,7 +4,7 @@ import { getHash, makeWfUrl } from '@utils/url'
 import { setSetting as setBodySetting } from '../helpers/dom'
 import { buildSession } from './session'
 import { cleanRootUrl } from '../helpers/url'
-import { Session } from '@composables/useSessions'
+import type { Layout, Session } from '@utils/session'
 
 /**
  * Live data read from a frame's window

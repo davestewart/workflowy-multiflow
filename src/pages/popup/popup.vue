@@ -122,7 +122,8 @@ import { computed, nextTick, ref, toRaw, watch } from 'vue'
 import { makeBus } from 'bus'
 import { SlickList } from 'vue-slicksort'
 import { clone } from '@utils/app'
-import { Layout, Session, useSessions } from '@composables/useSessions'
+import { useSessions } from '@composables/useSessions'
+import type { Layout, Session } from '@utils/session'
 
 // ---------------------------------------------------------------------------------------------------------------------
 // state

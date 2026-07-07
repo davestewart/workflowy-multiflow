@@ -2,7 +2,7 @@ import { makeBus } from 'bus'
 import { browser } from 'wxt/browser'
 import { Storage } from '@utils/storage'
 import { log } from '@utils/app'
-import { type Session, Sessions } from '@composables/useSessions'
+import { type Session, Sessions } from '@utils/session'
 
 /**
  * Background script

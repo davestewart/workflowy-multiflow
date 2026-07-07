@@ -1,6 +1,5 @@
-
 import { getHash, makeWfUrl } from '@utils/url'
-import { Layout, Session } from '@composables/useSessions'
+import type { Layout, Session } from '@utils/session'
 
 /**
  * Session logic for the content page: building a Session from live frames and

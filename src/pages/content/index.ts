@@ -10,7 +10,7 @@ import * as store from './services/frame'
 import { startSync } from './services/sync'
 import App from './components/App.vue'
 import './content.scss'
-import { Session } from '@composables/useSessions'
+import type { Session } from '@utils/session'
 
 export default defineContentScript({
   matches: [
