@@ -1,5 +1,4 @@
 import { defineConfig } from 'wxt'
-import vue from '@vitejs/plugin-vue'
 
 function toArray<T> (value: T | T[]): T[] {
   return Array.isArray(value)
@@ -21,10 +20,11 @@ const hostPermissions = [
 ]
 
 export default defineConfig({
+  modules: ['@wxt-dev/module-vue'],
+
   // folders
-  outDir: 'dist',
   srcDir: 'src',
-  entrypointsDir: 'pages',
+  outDir: 'dist',
 
   // manifest
   manifest: {
@@ -59,6 +59,7 @@ export default defineConfig({
   // build
   alias: {
     '@utils': './src/utils',
+    '@composables': './src/composables',
   },
 
   runner: {
@@ -80,7 +81,4 @@ export default defineConfig({
     },
   },
 
-  vite: () => ({
-    plugins: [vue()],
-  }),
 })

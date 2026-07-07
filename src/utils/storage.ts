@@ -2,7 +2,7 @@ import { browser } from 'wxt/browser'
 
 const s = browser.storage.local
 
-export const storage = {
+export const Storage = {
   async set (key: string, value: any) {
     return s.set({ [key]: value })
   },
