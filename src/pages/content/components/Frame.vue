@@ -37,10 +37,6 @@ onMounted(() => {
     }
   })
 
-  // set up focus
-  iframe.contentWindow!.addEventListener('focus', () => store.onFrameFocused(props.frame.id))
-  store.onFrameFocused(props.frame.id)
-
   // live data for session reads
   store.registry.set(props.frame.id, getData)
 })
@@ -64,6 +60,10 @@ function onReady () {
 
   // handle clicks
   addListeners(win, onClick)
+
+  // track focus per document; a full navigation replaces the window, losing listeners
+  win.addEventListener('focus', () => store.onFrameFocused(props.frame.id))
+  store.onFrameFocused(props.frame.id)
 
   // close button
   const button = doc.createElement('div')
