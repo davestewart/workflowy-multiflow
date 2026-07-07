@@ -1,5 +1,5 @@
 import { isModifier, stop } from '@utils/dom'
-import { makeWfUrl } from './url'
+import { makeWfUrl } from '@utils/url'
 
 type Windowish = Window | HTMLIFrameElement
 
@@ -45,7 +45,7 @@ export function addListeners (window: Window, handler: (href: string, hasModifie
         if (link) {
           // TODO fix this
           // @ts-ignore
-          handler(makeWfUrl(link.href), true, type)
+          handler(makeWfUrl(link.href, location.origin), true, type)
           stop(event)
         }
       }

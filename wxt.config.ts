@@ -1,5 +1,4 @@
 import { defineConfig } from 'wxt'
-import vue from '@vitejs/plugin-vue'
 
 function toArray<T> (value: T | T[]): T[] {
   return Array.isArray(value)
@@ -21,16 +20,17 @@ const hostPermissions = [
 ]
 
 export default defineConfig({
+  modules: ['@wxt-dev/module-vue'],
+
   // folders
-  outDir: 'dist',
   srcDir: 'src',
-  entrypointsDir: 'pages',
+  outDir: 'dist',
 
   // manifest
   manifest: {
     name: 'WorkFlowy MultiFlow',
     description : "Multi-column view for WorkFlowy",
-    version: '3.1.0',
+    version: '3.2.0',
     // @ts-ignore
     key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoWDu35r1oWfV8YVlJbXNOpqL3lhgO4wgyb7dfAcl6trIfwsQSg2W3EERJDbN3LzhYEmvszbrQlot+scVpK9WM94HbXag8IBEIiIh24WmX6xlv5PT3j2ibccXiJ9x/sCaP2MGRzPNkkO1hJjBIup6ogn3/U3ynbQ6lqdtYI9Ju0IWSNXIt493Ch/dvD1cjxPzLLcCcrU9O50evAm/gFknFiPla6UKqU6ApkUpnwO3L3emphEXtKcK1I/VfzCFDJ/7PUnOKVBiLwbQWZjSfhdLtdzdwovGgklr4XmicpEL//k5HO9zTjXd8eEL6Yo0ik1Kk/Skm9226B9rQnL6Od9WgwIDAQAB',
     permissions: [
@@ -59,6 +59,7 @@ export default defineConfig({
   // build
   alias: {
     '@utils': './src/utils',
+    '@composables': './src/composables',
   },
 
   runner: {
@@ -80,7 +81,4 @@ export default defineConfig({
     },
   },
 
-  vite: () => ({
-    plugins: [vue()],
-  }),
 })
