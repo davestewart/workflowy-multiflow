@@ -2,7 +2,7 @@ import { watch } from 'vue'
 import { type Bus } from 'bus'
 import { setSetting } from '../helpers/dom'
 import { makeRootUrl, parseRootUrl } from '../helpers/url'
-import { loading, mode, openUrls, session, setLayout, state, visibleFrames } from './frame'
+import { focusedIndex, loading, mode, openUrls, session, setLayout, state, visibleFrames } from './frame'
 
 /**
  * Central store side effects: body data-* attributes (the interop and CSS
@@ -12,7 +12,7 @@ export function startSync (bus: Bus): void {
   // settings; reflected as body data-* attributes
   watch(mode, value => setSetting('mode', value), { immediate: true })
   watch(() => visibleFrames.value.length, value => setSetting('frames', value), { immediate: true })
-  watch(() => state.focused, value => setSetting('focused', value), { immediate: true })
+  watch(focusedIndex, value => setSetting('focused', value), { immediate: true })
   watch(() => state.layout, value => setSetting('layout', value), { immediate: true })
   watch(loading, (value) => {
     setSetting('loading', value)

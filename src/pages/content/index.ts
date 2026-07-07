@@ -107,7 +107,7 @@ export default defineContentScript({
         if (store.mode.value === 'multiflow') {
           // window.location.href is the multiflow URL in this mode, not a WF node URL;
           // open the clicked link in the next frame instead
-          const focused = store.state.frames[store.state.focused]
+          const focused = store.state.frames.find(frame => frame.id === store.state.focused)
           if (focused) store.openInNextFrame(focused.id, url)
         }
         else {

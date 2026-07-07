@@ -52,6 +52,7 @@ export const state = reactive({
 
   layout: 'fill' as Layout,
 
+  // focused frame id (0 = none); an id survives the array splices that closeFrame does, an index would not
   focused: 0,
 
   // create a history entry (rather than replace) once the loading frames are ready
@@ -62,6 +63,13 @@ export const state = reactive({
 const ordered = computed(() => [...state.frames].sort((a, b) => a.order - b.order))
 
 export const visibleFrames = computed(() => ordered.value.filter(frame => frame.visible))
+
+// position of the focused frame in the iframe DOM order (creation order); the interop
+// API's data-focused contract. Derived live so it stays valid after frames are removed
+export const focusedIndex = computed(() => {
+  const index = state.frames.findIndex(frame => frame.id === state.focused)
+  return index < 0 ? 0 : index
+})
 
 export const mode = computed(() => visibleFrames.value.length > 1 ? 'multiflow' : 'workflowy')
 
@@ -271,8 +279,5 @@ export function onFrameNavigated (id: number, data: FrameData): void {
 }
 
 export function onFrameFocused (id: number): void {
-  const index = state.frames.findIndex(frame => frame.id === id)
-  if (index > -1) {
-    state.focused = index
-  }
+  state.focused = id
 }
