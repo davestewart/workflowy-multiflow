@@ -66,16 +66,30 @@ function onReady () {
   store.onFrameFocused(props.frame.id)
 
   // close button
-  const button = doc.createElement('div')
   const header = doc.body.querySelector('.header')
   if (header) {
-    header.appendChild(button)
-    button.style.marginLeft = '-10px'
-    button.style.marginRight = '10px'
-    button.innerHTML = '<div class="iconButton _pn8v4l"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke-linecap="round" stroke="#b7bcbf" style="position: relative;"><line x1="1" y1="1" x2="19" y2="19"></line><line x1="19" y1="1" x2="1" y2="19"></line></svg></div>'
+    const button = doc.createElement('div')
+    button.className = 'relative outline-none menu'
+    Object.assign(button.style, {
+      position: 'absolute',
+      right: '8px',
+      top: '56px'
+    })
+    button.innerHTML = `<div>
+                          <div
+                            class="iconButton lg shape-circle"
+                            data-style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M1.46973 1.46973C1.76262 1.17683 2.23738 1.17683 2.53028 1.46973L12.5303 11.4697C12.8232 11.7626 12.8232 12.2374 12.5303 12.5303C12.2374 12.8232 11.7626 12.8232 11.4697 12.5303L1.46973 2.53027C1.17684 2.23738 1.17684 1.76262 1.46973 1.46973Z" />
+                              <path d="M11.4697 1.46973C11.7626 1.17683 12.2374 1.17683 12.5303 1.46973C12.8232 1.76262 12.8232 2.23738 12.5303 2.53027L2.53028 12.5303C2.23738 12.8232 1.76262 12.8232 1.46973 12.5303C1.17684 12.2374 1.17684 11.7626 1.46973 11.4697L11.4697 1.46973Z" />
+                            </svg>
+                          </div>
+                        </div>`
     button.addEventListener('click', (event) => {
       store.closeFrame(props.frame.id, isModifier(event))
     })
+    header.appendChild(button)
   }
 }
 
