@@ -153,7 +153,7 @@ const options = {
     fill: 'Fill',
     hug: 'Hug',
     nav: 'Nav',
-    // custom: 'Custom'
+    custom: 'Custom'
   } as Record<Layout, string>,
 }
 
