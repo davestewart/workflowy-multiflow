@@ -69,10 +69,26 @@ body {
   }
 
   .splitter {
-    flex: 0 0 5px;
+    // visually a 1px line; the wider grab area is the ::before overlay below
+    flex: 0 0 1px;
     height: 100%;
-    cursor: col-resize;
+    position: relative;
     background: #DDD;
+    // sit above the iframes so the grab overlay catches the cursor over them
+    z-index: 2;
+
+    // grab area: extends over the neighbouring frames without taking layout space.
+    // biased to the right so it clears the left frame's native scrollbar, which
+    // sits just to the left of the splitter
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -1px;
+      right: -6px;
+      cursor: col-resize;
+    }
 
     &:hover {
       background: #BBB;

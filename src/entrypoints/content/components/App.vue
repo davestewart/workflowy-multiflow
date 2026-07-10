@@ -14,20 +14,21 @@
       :style="frameStyle(frame)"
     />
 
-    <!-- draggable splitters between adjacent visible columns -->
+    <!-- draggable splitters between adjacent visible columns; double-click to even out -->
     <div
       v-for="splitter in splitters"
       :key="`splitter-${splitter.leftId}`"
       class="splitter"
       :style="{ order: splitter.order }"
       @mousedown.prevent="onDragStart($event, splitter)"
+      @dblclick.prevent="onReset"
     />
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { MIN_PANE_WIDTH, setWidths, state, visibleFrames, widths } from '../services/frame'
+import { MIN_PANE_WIDTH, setLayout, setWidths, state, visibleFrames, widths } from '../services/frame'
 import type { FrameState } from '../services/frame'
 import type { Width } from '@utils/session'
 import Frame from './Frame.vue'
@@ -108,30 +109,52 @@ function onDragMove (event: MouseEvent) {
     return
   }
 
-  // steal-from-neighbour: the two adjacent columns trade pixels, their sum held
+  // recompute from the drag-start snapshot each move, so the result is a pure
+  // function of the total delta (deterministic + reversible mid-drag)
   const { leftIndex, widthsPx } = drag
-  const startLeft = widthsPx[leftIndex]
-  const startRight = widthsPx[leftIndex + 1]
-  const total = startLeft + startRight
-  let left = startLeft + (event.clientX - drag.startX)
-  let right = total - left
+  const delta = event.clientX - drag.startX
+  const result = [...widthsPx]
+  const last = result.length - 1
 
-  // clamp so neither adjacent column drops below the minimum
-  if (left < MIN_PANE_WIDTH) {
-    left = MIN_PANE_WIDTH
-    right = total - left
+  if (delta > 0) {
+    // grow the left column, pushing the following columns nearest-first; each
+    // gives up space down to the minimum before the push cascades to the next
+    let remaining = delta
+    for (let j = leftIndex + 1; j <= last && remaining > 0; j++) {
+      const take = Math.min(remaining, widthsPx[j] - MIN_PANE_WIDTH)
+      if (take > 0) {
+        result[j] = widthsPx[j] - take
+        remaining -= take
+      }
+    }
+    result[leftIndex] = widthsPx[leftIndex] + (delta - remaining)
   }
-  else if (right < MIN_PANE_WIDTH) {
-    right = MIN_PANE_WIDTH
-    left = total - right
+  else if (delta < 0) {
+    // shrink the left column, pulling from the earlier columns nearest-first;
+    // each gives up space down to the minimum before the pull cascades to the
+    // previous one. The freed space is handed to the immediate follower
+    let remaining = -delta
+    for (let j = leftIndex; j >= 0 && remaining > 0; j--) {
+      const take = Math.min(remaining, widthsPx[j] - MIN_PANE_WIDTH)
+      if (take > 0) {
+        result[j] = widthsPx[j] - take
+        remaining -= take
+      }
+    }
+    result[leftIndex + 1] = widthsPx[leftIndex + 1] + (-delta - remaining)
   }
 
   // emit a custom spec: every column fixed at its (updated) px except the last,
   // which flexes to absorb the remainder — fixed-left, flexible-last
-  const spec: Width[] = widthsPx.map((width, index) =>
-    Math.round(index === leftIndex ? left : index === leftIndex + 1 ? right : width))
-  spec[spec.length - 1] = '*'
+  const spec: Width[] = result.map(width => Math.round(width))
+  spec[last] = '*'
   setWidths(spec)
+}
+
+// even the columns back out — the fill preset is exactly-equal flex, and drops
+// the custom widths from the URL / session
+function onReset () {
+  setLayout('fill')
 }
 
 function onDragEnd () {
