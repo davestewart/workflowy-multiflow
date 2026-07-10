@@ -75,14 +75,14 @@ export default defineContentScript({
       setTimeout(() => store.openUrls(urls, false), 100)
     }
 
-    // otherwise, wait for workflowy to load
-    else {
-      void runWhen(
-        () => document.getElementById('loadingScreen')?.style.display === 'none',
-        () => runWhen(checkReady(document), onReady),
-        250,
-      )
-    }
+    // always wait for workflowy's own app to be ready, so root-page click
+    // handling (used once back in single-page mode) is registered even when
+    // the tab boots straight into a multiflow url
+    void runWhen(
+      () => document.getElementById('loadingScreen')?.style.display === 'none',
+      () => runWhen(checkReady(document), onReady),
+      250,
+    )
 
     /**
      * Note that MultiFlow doesn't even load if WorkFlowy's "Open links in desktop app"

@@ -20,6 +20,10 @@ Added:
 - Refactored main content script that manages frame creation and navigation to be a Vue 3 app
 - Refactored frame serialisation to use indexed parameters
 
+Fixed:
+
+- Workflowy / Multiflow navigation frame swapping bug
+
 ## [v3.1.0] - 2026-07-05
 
 Added:

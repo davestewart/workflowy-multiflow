@@ -265,11 +265,24 @@ export function closeFrame (id: number, remove = false): void {
     }
   }
 
-  // otherwise, exit multiflow to the remaining frame
+  // otherwise, exit multiflow to the remaining frame: hide (or remove) both
+  // frames first, so `mode` flips to 'workflowy' — this hides the multiflow
+  // div via CSS, and stops the session watcher from re-pushing the multiflow
+  // url over the navigation below. Hiding rather than removing keeps both
+  // iframes mounted, so re-entering multiflow reuses them instead of reloading
   else {
     const other = visibleFrames.value.find(frame => frame.id !== id)
     if (other) {
       const url = registry.get(other.id)?.().url ?? other.url
+      if (remove) {
+        state.frames.splice(state.frames.indexOf(frame), 1)
+        state.frames.splice(state.frames.indexOf(other), 1)
+        normalizeOrders()
+      }
+      else {
+        hideFrame(frame)
+        hideFrame(other)
+      }
       window.location.href = makeWfUrl(url, ORIGIN)
     }
   }
