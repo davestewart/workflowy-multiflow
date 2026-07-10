@@ -1,5 +1,6 @@
 <template>
-  <iframe ref="el" :class="{ hidden: !frame.visible }" :style="{ order: frame.order }" />
+  <!-- bare iframe; App.vue owns order / width / visibility via fall-through style -->
+  <iframe ref="el" />
 </template>
 
 <script setup lang="ts">
