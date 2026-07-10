@@ -220,7 +220,6 @@ async function getData () {
     }
     if (data.session.urls.length === 1) {
       session.value.settings.layout = 'fill'
-      void setSetting('layout', 'fill')
     }
   }
   else {

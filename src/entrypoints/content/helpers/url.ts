@@ -44,10 +44,11 @@ export function cleanRootUrl () {
   // get query
   const { origin, id, search } = parseRoute(location.href)
 
-  // clean frame params
+  // clean frame params (indexed f1, f2, … plus legacy f, and layout / widths)
   const params = new URLSearchParams(search)
+  const rxFrame = new RegExp(`^${FRAMES}\\d+$`)
   Array.from(params.keys()).forEach((key) => {
-    if (key === FRAMES || key === LAYOUT || key === WIDTHS) {
+    if (rxFrame.test(key) || key === FRAMES || key === LAYOUT || key === WIDTHS) {
       params.delete(key)
     }
   })
