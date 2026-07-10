@@ -1,5 +1,5 @@
 import { getHash, makeWfUrl } from '@utils/url'
-import type { Layout, Session } from '@utils/session'
+import type { Layout, Session, Width } from '@utils/session'
 
 /**
  * Session logic for the content page: building a Session from live frames and
@@ -25,6 +25,7 @@ export interface FrameLike {
 // MultiFlow URL param names (the serialisation contract)
 export const FRAMES = 'f'
 export const LAYOUT = 'l'
+export const WIDTHS = 's'
 
 // ---------------------------------------------------------------------------------------------------------------------
 // session <-> url serialisation
@@ -47,7 +48,9 @@ function tryDecode (value: string) {
  *
  * One indexed param per frame; URLSearchParams encodes each hash correctly,
  * including hashes carrying a search query (#/abc?q=foo). Layout is only added
- * when it is meaningful (multiple frames, non-default value).
+ * when it is meaningful (multiple frames, non-default value). Widths are only
+ * added for `custom` (presets derive their own), appended raw so the commas
+ * stay unescaped, e.g. `s=460,1000,*`.
  */
 export function encodeSession (session: Session): string {
   const { urls, settings } = session
@@ -56,7 +59,11 @@ export function encodeSession (session: Session): string {
   if (settings.layout && settings.layout !== 'fill' && urls.length > 1) {
     params.set(LAYOUT, settings.layout)
   }
-  return params.toString()
+  let query = params.toString()
+  if (settings.layout === 'custom' && Array.isArray(settings.widths) && urls.length > 1) {
+    query += `&${WIDTHS}=${(settings.widths as Width[]).join(',')}`
+  }
+  return query
 }
 
 /**
@@ -67,7 +74,7 @@ export function encodeSession (session: Session): string {
  *
  * https://workflowy.com/#?f1=fa901479206c&f2=ed7149b5e538&l=nav
  */
-export function decodeSession (search: string): { hashes: string[], layout?: Layout } {
+export function decodeSession (search: string): { hashes: string[], layout?: Layout, widths?: Width[] } {
   const params = new URLSearchParams(search)
   const rxFrame = new RegExp(`^${FRAMES}\\d+$`)
 
@@ -86,10 +93,29 @@ export function decodeSession (search: string): { hashes: string[], layout?: Lay
       .map(tryDecode)
   }
 
+  // widths imply the custom layout; a present `s=` wins over the `l=` token
+  const widths = decodeWidths(params.get(WIDTHS))
+
   return {
     hashes,
-    layout: (params.get(LAYOUT) as Layout) || undefined,
+    layout: widths ? 'custom' : (params.get(LAYOUT) as Layout) || undefined,
+    widths,
   }
+}
+
+/**
+ * Parse an `s=460,1000,*` widths param into `[460, 1000, '*']`, dropping any
+ * malformed entries. Returns undefined when absent or empty.
+ */
+function decodeWidths (raw: string | null): Width[] | undefined {
+  if (!raw) {
+    return undefined
+  }
+  const widths = raw
+    .split(',')
+    .map(token => token === '*' ? '*' : parseInt(token, 10))
+    .filter((width): width is Width => width === '*' || (typeof width === 'number' && !isNaN(width)))
+  return widths.length ? widths : undefined
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

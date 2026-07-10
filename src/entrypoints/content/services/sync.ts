@@ -2,7 +2,7 @@ import { watch } from 'vue'
 import { type Bus } from 'bus'
 import { setSetting } from '../helpers/dom'
 import { makeRootUrl, parseRootUrl } from '../helpers/url'
-import { focusedIndex, loading, mode, openUrls, session, setLayout, state, visibleFrames } from './frame'
+import { focusedIndex, loading, mode, openUrls, session, setLayout, setWidths, state, visibleFrames } from './frame'
 
 /**
  * Central store side effects: body data-* attributes (the interop and CSS
@@ -71,11 +71,13 @@ function syncSession (): void {
  * Sync frames when the user navigates back / forward
  */
 function onPopState (): void {
-  const { urls, layout } = parseRootUrl(true)
+  const { urls, layout, widths } = parseRootUrl(true)
 
   // multiflow url; diff-load frames without touching history
   if (urls.length > 1) {
-    setLayout(layout || 'fill')
+    widths
+      ? setWidths(widths)
+      : setLayout(layout || 'fill')
     openUrls(urls, false)
   }
 

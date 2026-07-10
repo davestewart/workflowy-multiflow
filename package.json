@@ -1,6 +1,7 @@
 {
   "name": "workflowy-multiflow",
   "description": "Multi-column view for WorkFlowy",
+  "version": "3.3.0",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,5 +1,5 @@
 import { parseRoute } from '@utils/url'
-import { decodeSession, encodeSession, FRAMES, LAYOUT } from '../services/session'
+import { decodeSession, encodeSession, FRAMES, LAYOUT, WIDTHS } from '../services/session'
 import type { Session } from '@utils/session'
 
 /**
@@ -16,10 +16,11 @@ const ORIGIN = window.location.origin
  */
 export function parseRootUrl (asUrls = false) {
   const { search } = parseRoute(location.href)
-  const { hashes, layout } = decodeSession(search)
+  const { hashes, layout, widths } = decodeSession(search)
   return {
     urls: hashes.map(hash => asUrls ? `${ORIGIN}/#${hash}` : hash),
     layout,
+    widths,
   }
 }
 
@@ -43,10 +44,11 @@ export function cleanRootUrl () {
   // get query
   const { origin, id, search } = parseRoute(location.href)
 
-  // clean frame params
+  // clean frame params (indexed f1, f2, … plus legacy f, and layout / widths)
   const params = new URLSearchParams(search)
+  const rxFrame = new RegExp(`^${FRAMES}\\d+$`)
   Array.from(params.keys()).forEach((key) => {
-    if (key === FRAMES || key === LAYOUT) {
+    if (rxFrame.test(key) || key === FRAMES || key === LAYOUT || key === WIDTHS) {
       params.delete(key)
     }
   })

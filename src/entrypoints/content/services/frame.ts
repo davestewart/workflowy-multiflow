@@ -3,8 +3,8 @@ import { log } from '@utils/app'
 import { getHash, makeWfUrl } from '@utils/url'
 import { setSetting as setBodySetting } from '../helpers/dom'
 import { buildSession } from './session'
-import { cleanRootUrl } from '../helpers/url'
-import type { Layout, Session } from '@utils/session'
+import { cleanRootUrl, WF_WIDTH } from '../helpers/url'
+import type { Layout, Session, Width } from '@utils/session'
 
 /**
  * Live data read from a frame's window
@@ -42,6 +42,24 @@ let seq = 0
 const ORIGIN = window.location.origin
 
 // ---------------------------------------------------------------------------------------------------------------------
+// widths
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Narrowest a column may ever get, in px.
+ *
+ * ~470px is the point below which WorkFlowy's own UI starts clipping / hiding
+ * chrome, so no column should shrink past it. Enforced twice: as CSS
+ * `min-width` on each column, and as a clamp while dragging a splitter.
+ */
+export const MIN_PANE_WIDTH = 470
+
+// default fixed width of the `nav` sidebar column; a real px so it doesn't
+// balloon with the viewport. Pinned to the floor above (a nav below the min
+// would clip WorkFlowy's chrome).
+export const NAV_WIDTH = MIN_PANE_WIDTH
+
+// ---------------------------------------------------------------------------------------------------------------------
 // state
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -51,6 +69,11 @@ export const state = reactive({
   frames: [] as FrameState[],
 
   layout: 'fill' as Layout,
+
+  // per-visible-column widths for the `custom` layout, indexed by visual order;
+  // exactly one entry is '*' (the last, by default authoring). Only meaningful
+  // while layout === 'custom'; presets derive their widths from defaultWidths()
+  customWidths: [] as Width[],
 
   // focused frame id (0 = none); an id survives the array splices that closeFrame does, an index would not
   focused: 0,
@@ -63,6 +86,53 @@ export const state = reactive({
 const ordered = computed(() => [...state.frames].sort((a, b) => a.order - b.order))
 
 export const visibleFrames = computed(() => ordered.value.filter(frame => frame.visible))
+
+/**
+ * The effective width spec for the current layout + visible column count.
+ *
+ * Each layout is just a pattern over the one pixel/`*` model: `fill` is all
+ * flexible, `nav` pins a fixed sidebar, `hug` is all fixed (and scrolls), and
+ * `custom` carries the user's dragged widths.
+ */
+export const widths = computed<Width[]>(() => defaultWidths(state.layout, visibleFrames.value.length))
+
+export function defaultWidths (layout: Layout, n: number): Width[] {
+  if (n <= 0) {
+    return []
+  }
+  switch (layout) {
+    // all fixed at a full WorkFlowy width; the container scrolls horizontally
+    case 'hug':
+      return Array(n).fill(WF_WIDTH)
+
+    // fixed sidebar, everything else flexes
+    case 'nav':
+      return n === 1 ? ['*'] : [NAV_WIDTH, ...Array(n - 1).fill('*')]
+
+    // the user's dragged widths, refit if a frame was added / removed since
+    case 'custom':
+      return state.customWidths.length === n ? [...state.customWidths] : fitWidths(state.customWidths, n)
+
+    // even split: every column flexes
+    case 'fill':
+    default:
+      return Array(n).fill('*')
+  }
+}
+
+/**
+ * Refit a stored custom spec to a new column count (a frame was opened / closed
+ * while in custom layout): keep leading fixed widths, drop / pad to length, and
+ * force the last column flexible per the fixed-left / flexible-last rule.
+ */
+function fitWidths (spec: Width[], n: number): Width[] {
+  const out = spec.slice(0, n)
+  while (out.length < n) {
+    out.push('*')
+  }
+  out[out.length - 1] = '*'
+  return out
+}
 
 // position of the focused frame in the iframe DOM order (creation order); the interop
 // API's data-focused contract. Derived live so it stays valid after frames are removed
@@ -79,7 +149,19 @@ export const session = computed<Session>(() => buildSession(visibleFrames.value.
   url: frame.url,
   hash: getHash(frame.url),
   title: frame.title,
-})), { layout: state.layout }, ORIGIN))
+})), currentSettings(), ORIGIN))
+
+/**
+ * The persisted settings for the current layout. Widths are only carried for
+ * `custom`; every preset's widths are derivable from its name + column count.
+ */
+function currentSettings (): Session['settings'] {
+  const settings: Session['settings'] = { layout: state.layout }
+  if (state.layout === 'custom') {
+    settings.widths = widths.value
+  }
+  return settings
+}
 
 /**
  * Live frame data accessors, registered by mounted Frame components
@@ -109,7 +191,7 @@ export function getSession (): Session {
   if (frames.length === 0) {
     frames.push(getRootData())
   }
-  return buildSession(frames, { layout: state.layout }, ORIGIN)
+  return buildSession(frames, currentSettings(), ORIGIN)
 }
 
 function getRootData (): FrameData {
@@ -183,11 +265,24 @@ export function closeFrame (id: number, remove = false): void {
     }
   }
 
-  // otherwise, exit multiflow to the remaining frame
+  // otherwise, exit multiflow to the remaining frame: hide (or remove) both
+  // frames first, so `mode` flips to 'workflowy' — this hides the multiflow
+  // div via CSS, and stops the session watcher from re-pushing the multiflow
+  // url over the navigation below. Hiding rather than removing keeps both
+  // iframes mounted, so re-entering multiflow reuses them instead of reloading
   else {
     const other = visibleFrames.value.find(frame => frame.id !== id)
     if (other) {
       const url = registry.get(other.id)?.().url ?? other.url
+      if (remove) {
+        state.frames.splice(state.frames.indexOf(frame), 1)
+        state.frames.splice(state.frames.indexOf(other), 1)
+        normalizeOrders()
+      }
+      else {
+        hideFrame(frame)
+        hideFrame(other)
+      }
       window.location.href = makeWfUrl(url, ORIGIN)
     }
   }
@@ -197,10 +292,21 @@ export function setLayout (layout: Layout): void {
   state.layout = layout
 }
 
+/**
+ * Adopt an explicit set of column widths; this is what a splitter drag or a
+ * restored `s=` produces, so it always means the layout is now `custom`.
+ */
+export function setWidths (widths: Width[]): void {
+  state.customWidths = widths
+  state.layout = 'custom'
+}
+
 export function setSetting (key: string, value: any): void {
   key === 'layout'
     ? setLayout(value)
-    : setBodySetting(key, value)
+    : key === 'widths'
+      ? setWidths(value)
+      : setBodySetting(key, value)
 }
 
 export function applySession (session: Session): void {

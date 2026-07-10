@@ -153,7 +153,7 @@ const options = {
     fill: 'Fill',
     hug: 'Hug',
     nav: 'Nav',
-    // custom: 'Custom'
+    custom: 'Custom'
   } as Record<Layout, string>,
 }
 
@@ -220,7 +220,6 @@ async function getData () {
     }
     if (data.session.urls.length === 1) {
       session.value.settings.layout = 'fill'
-      void setSetting('layout', 'fill')
     }
   }
   else {

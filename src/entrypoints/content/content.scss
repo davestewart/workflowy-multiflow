@@ -23,22 +23,6 @@ body {
     }
   }
 
-  &[data-layout="hug"] {
-    overflow-x: scroll;
-  }
-
-  &[data-layout="hug"] iframe {
-    min-width: 700px !important;
-  }
-
-  &[data-layout="nav"] iframe:first-child {
-    max-width: 450px;
-  }
-
-  &[data-frames="1"] iframe {
-    max-width: unset !important;
-  }
-
   &[data-message] .message {
 
   }
@@ -53,19 +37,62 @@ body {
 
   main {
     display: flex;
+    width: 100%;
     height: 100%;
+
+    // fixed columns (hug, or dragged widths wider than the viewport) overflow;
+    // a `*` column always fits, so no scrollbar appears for fill / nav
+    overflow-x: auto;
+
+    // iframes swallow mouse events, so a drag started on a splitter is lost the
+    // moment the cursor crosses a frame. While dragging, disable frame pointer
+    // events (and text selection) so the drag survives until mouseup.
+    &.dragging {
+      cursor: col-resize;
+      user-select: none;
+
+      iframe {
+        pointer-events: none;
+      }
+    }
   }
 
   iframe {
-    flex: 1;
+    // flex (fixed px or `*`) is applied inline by App.vue; min-width is the hard
+    // floor — see MIN_PANE_WIDTH: below ~470px WorkFlowy's own UI starts clipping
+    flex: 1 1 0;
+    min-width: 470px;
     margin: 0;
     height: 100%;
     border: none;
     outline: 1px solid #DDD;
   }
 
-  .hidden {
-    display: none;
+  .splitter {
+    // visually a 1px line; the wider grab area is the ::before overlay below
+    flex: 0 0 1px;
+    height: 100%;
+    position: relative;
+    background: #DDD;
+    // sit above the iframes so the grab overlay catches the cursor over them
+    z-index: 2;
+
+    // grab area: extends over the neighbouring frames without taking layout space.
+    // biased to the right so it clears the left frame's native scrollbar, which
+    // sits just to the left of the splitter
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -1px;
+      right: -6px;
+      cursor: col-resize;
+    }
+
+    &:hover {
+      background: #BBB;
+    }
   }
 }
 

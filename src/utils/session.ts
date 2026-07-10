@@ -1,7 +1,10 @@
 import { Storage } from '@utils/storage'
 
-export type Layout = 'hug' | 'fill' | 'nav' // | 'custom'
+export type Layout = 'hug' | 'fill' | 'nav' | 'custom'
 export type Setting = 'layout' | string
+
+// a column width: an explicit pixel value, or '*' to flex and fill the remaining viewport
+export type Width = number | '*'
 
 export interface Session {
   id: string
